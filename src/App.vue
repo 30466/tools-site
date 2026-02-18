@@ -12,6 +12,8 @@
             <router-link to="/">首页</router-link>
             <!-- 新增：小偶像音乐网站 -->
             <a href="https://abm48.com/" target="_blank">小偶像音乐网站</a>
+            <!-- 新增：成员档案 -->
+            <a href="https://snh48wiki.top/" target="_blank">成员档案</a>
             <!-- 新增：关于页面 -->
             <router-link to="/about">关于</router-link>
             
