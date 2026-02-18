@@ -1,5 +1,7 @@
 <template>
   <div class="clip-page">
+    <VideoToolsNav />
+    
     <el-card class="clip-card">
       <template #header>
         <div class="card-header">
@@ -100,8 +102,9 @@
           <!-- 【新增】输出格式选择 -->
           <div class="setting-item">
             <span class="label">输出格式:</span>
-            <el-select v-model="targetFormat" placeholder="选择格式" style="width: 100px" size="large">
+            <el-select v-model="targetFormat" placeholder="选择格式" style="width: 120px" size="large">
               <el-option label="MP4" value="mp4" />
+              <el-option label="M4A (推荐)" value="m4a" />
               <el-option label="MP3 (音频)" value="mp3" />
               <el-option label="WAV (无损音频)" value="wav" />
               <el-option label="AAC (音频)" value="aac" />
@@ -114,9 +117,9 @@
           <!-- 剪辑模式 (根据格式自动调整，用户选了音频格式就不用管这个了) -->
           <div class="setting-item">
             <span class="label">处理模式:</span>
-            <el-radio-group v-model="clipMode" :disabled="isAudioTarget">
+            <el-radio-group v-model="clipMode">
               <el-radio label="copy" border>🚀 极速 (Copy流)</el-radio>
-              <el-radio label="encode" border disabled>兼容 (浏览器转码慢)</el-radio>
+              <el-radio label="encode" border :disabled="!isAudioTarget">兼容 (重编码)</el-radio>
             </el-radio-group>
           </div>
         </div>
@@ -149,12 +152,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue';
+import { ref, computed, onMounted, nextTick, watch } from 'vue';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile, toBlobURL } from '@ffmpeg/util';
 import JSZip from 'jszip';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { VideoPlay, Document, Delete, Scissor, Link } from '@element-plus/icons-vue';
+import VideoToolsNav from '@/components/VideoToolsNav.vue';
 
 // --- 状态变量 ---
 const ffmpeg = new FFmpeg();
@@ -171,11 +175,23 @@ const targetFormat = ref('mp4');
 // --- 计算属性 ---
 // 【新增】判断目标是否为音频格式
 const isAudioTarget = computed(() => {
-  return ['mp3', 'wav', 'aac', 'flac', 'opus'].includes(targetFormat.value);
+  return ['mp3', 'wav', 'aac', 'flac', 'opus', 'm4a'].includes(targetFormat.value);
 });
 
 const readyToClip = computed(() => {
   return isFFmpegLoaded.value && videoFile.value && clipList.value.length > 0;
+});
+
+// --- 监听器 ---
+// 当目标格式变化时，自动调整模式以避免错误配置
+watch(targetFormat, (newVal) => {
+  // 需要重编码的格式
+  if (['mp3', 'wav', 'flac', 'opus', 'aac'].includes(newVal)) {
+    clipMode.value = 'encode';
+  } else {
+    // 容器格式
+    clipMode.value = 'copy';
+  }
 });
 
 // --- 初始化 FFmpeg ---
@@ -323,10 +339,13 @@ const startBatchClip = async () => {
     // 循环处理
     for (let i = 0; i < clipList.value.length; i++) {
       const clip = clipList.value[i];
-      const safeName = clip.name.replace(/[\\/*?:"<>|]/g, "_") || `clip_${i}`;
+      // const safeName = clip.name.replace(/[\\/*?:"<>|]/g, "_") || `clip_${i}`;
+      // 这里 safeName 仅用于最终 ZIP 里的文件名，不影响 FFmpeg 内部命令，因此可以使用 utf-8
+      const safeName = clip.name || `clip_${i}`;
       
       // 使用用户选择的后缀名
       const outExt = '.' + targetFormat.value;
+      // FFmpeg 内部输出使用纯 ASCII
       const outputName = `output_${i}${outExt}`;
       
       addLog(`✂️ [${i+1}/${clipList.value.length}] 处理: ${safeName} -> ${targetFormat.value.toUpperCase()}`);
@@ -343,13 +362,19 @@ const startBatchClip = async () => {
         // === 导出音频 ===
         cmd.push('-vn'); // 去除视频流
         
-        // 简单的音频编码映射
-        switch (targetFormat.value) {
-          case 'mp3': cmd.push('-c:a', 'libmp3lame'); break; // MP3编码器
-          case 'aac': cmd.push('-c:a', 'aac'); break;        // AAC编码器
-          case 'wav': cmd.push('-c:a', 'pcm_s16le'); break;  // WAV无损
-          case 'flac': cmd.push('-c:a', 'flac'); break;      // FLAC无损
-          default: cmd.push('-c:a', 'copy'); break; // 尝试直接复制
+        // 如果用户强制选了 copy 模式，直接 copy
+        if (clipMode.value === 'copy') {
+             cmd.push('-c:a', 'copy');
+        } else {
+            // 简单的音频编码映射
+            switch (targetFormat.value) {
+              case 'mp3': cmd.push('-c:a', 'libmp3lame'); break; // MP3编码器
+              case 'm4a': cmd.push('-c:a', 'aac'); break;        // M4A编码器
+              case 'aac': cmd.push('-c:a', 'aac'); break;        // AAC编码器
+              case 'wav': cmd.push('-c:a', 'pcm_s16le'); break;  // WAV无损
+              case 'flac': cmd.push('-c:a', 'flac'); break;      // FLAC无损
+              default: cmd.push('-c:a', 'copy'); break; // 尝试直接复制
+            }
         }
       } else {
         // === 导出视频 ===

@@ -8,6 +8,8 @@
 - `/download` abm48 APP 下载中心（含管理员上传）
 - `/member-archive` 成员档案 APP 下载（含管理员上传）
 - `/clip` 导入切片本批量剪切（FFmpeg WASM，本地处理并打包 ZIP 下载）
+- `/transcode` 批量转码（支持音频提取、格式转换、极速模式）
+- `/merge` 媒体合并（支持无损极速合并、拖拽排序、内存超限保护）
 - `/about` 关于 / 友情链接 / 联系方式
 
 ## 技术栈
@@ -17,6 +19,7 @@
 - Element Plus（zh-CN）
 - `@ffmpeg/ffmpeg` + `@ffmpeg/core` + `@ffmpeg/util`
 - JSZip（批量输出 ZIP）
+- SortableJS（拖拽排序）
 
 ## 本地开发
 
@@ -54,6 +57,12 @@ FFmpeg 核心文件从站点路径加载：
 
 - `public/apks/abm48/version.json`
 - `public/apks/member_archive/version.json`
+
+下载统计接口（PHP）：
+
+- `public/apks/abm48/count.php`
+- `public/apks/member_archive/count.php`
+- 统计数据存储于同目录下的 `stats.json`
 
 管理员上传接口（PHP）：
 

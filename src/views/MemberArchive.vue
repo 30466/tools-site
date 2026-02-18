@@ -117,7 +117,12 @@
               作者：<a href="https://space.bilibili.com/60064858" target="_blank" class="author-link">路空空k</a>
             </div>
           </div>
-          <el-tag type="success" effect="dark" v-if="latestVersion">最新版本: {{ latestVersion.name }}</el-tag>
+          <div class="version-tags">
+            <el-tag type="info" effect="plain" v-if="totalDownloads !== null" style="margin-right: 10px">
+              总下载量: {{ totalDownloads }}
+            </el-tag>
+            <el-tag type="success" effect="dark" v-if="latestVersion">最新版本: {{ latestVersion.name }}</el-tag>
+          </div>
         </div>
       </template>
       
@@ -175,6 +180,7 @@ import { ElMessage } from 'element-plus'
 
 const apkList = ref([])
 const latestVersion = computed(() => apkList.value[0] || null)
+const totalDownloads = ref(null)
 const uploading = ref(false)
 const fileInput = ref(null)
 const uploadForm = ref({
@@ -197,6 +203,13 @@ const fetchVersions = async () => {
     if (response.ok) {
       apkList.value = await response.json()
     }
+    
+    // 加载下载统计
+    const statsRes = await fetch(`/apks/member_archive/stats.json?t=${Date.now()}`)
+    if (statsRes.ok) {
+      const stats = await statsRes.json()
+      totalDownloads.value = stats.total_downloads || 0
+    }
   } catch (error) {
     console.error('Failed to load version list:', error)
   }
@@ -207,6 +220,15 @@ onMounted(() => {
 })
 
 const downloadApk = (url) => {
+  // 1. 前端手动 +1 (即时反馈)
+  if (totalDownloads.value !== null) {
+    totalDownloads.value++
+  }
+  
+  // 2. 后台请求计数
+  fetch('/apks/member_archive/count.php', { method: 'POST' }).catch(err => console.error(err))
+
+  // 3. 开始下载
   window.open(url, '_blank')
 }
 

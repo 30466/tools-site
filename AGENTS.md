@@ -3,7 +3,7 @@
 #+#+#+#+----------------------------------------------
 
 Project: tools-site / abm48 工具箱
-Stack: Vue 3 (Composition API) + Vite + Element Plus + FFmpeg WASM + JSZip
+Stack: Vue 3 (Composition API) + Vite + Element Plus + FFmpeg WASM + JSZip + SortableJS
 
 This file is meant for coding agents. Keep changes small, follow existing patterns,
 and be careful with deployment requirements (COOP/COEP for FFmpeg).
@@ -54,6 +54,8 @@ Tests:
   - Home: `src/views/Home.vue`
   - APK download/admin upload: `src/views/Download.vue`, `src/views/MemberArchive.vue`
   - FFmpeg batch clipper: `src/views/Clip.vue`
+  - FFmpeg batch transcoder: `src/views/Transcode.vue`
+  - FFmpeg media merger: `src/views/Merge.vue`
   - About/links/contact: `src/views/About.vue`
 - Vite config (COOP/COEP + ffmpeg optimizeDeps exclude): `vite.config.js`
 - Static assets:
@@ -62,7 +64,7 @@ Tests:
 
 ## Project-Specific Constraints (FFmpeg WASM)
 
-- `/clip` uses `@ffmpeg/ffmpeg` and requires `SharedArrayBuffer`.
+- `/clip`, `/transcode`, `/merge` use `@ffmpeg/ffmpeg` and require `SharedArrayBuffer`.
 - Production MUST send headers (Cross-Origin Isolation):
   - `Cross-Origin-Opener-Policy: same-origin`
   - `Cross-Origin-Embedder-Policy: require-corp`
@@ -132,6 +134,6 @@ CSS:
 ## Changes Checklist (Before You Finish)
 
 - Run at least: `npm run dev` (manual quick smoke check) when possible.
-- If you touch `/clip` or headers-related code, verify `window.crossOriginIsolated` behavior.
+- If you touch `/clip`, `/transcode`, `/merge` or headers-related code, verify `window.crossOriginIsolated` behavior.
 - If you modify APK upload logic, verify it still reads passwords from `public/apks/config.php`
   and updates the correct `version.json` files.

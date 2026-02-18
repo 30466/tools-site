@@ -1,6 +1,6 @@
 # SRC KNOWLEDGE BASE
 
-**Generated:** 2026-02-04
+**Generated:** 2026-02-19
 **Type:** Vue 3 + Element Plus Frontend Source
 **Purpose:** 偶像应援工具网站前端源码
 
@@ -13,7 +13,8 @@ src/
 ├── main.js              # Vue app initialization + Element Plus setup
 ├── App.vue              # Root layout with navigation + background image
 ├── router/              # Vue Router 4 configuration
-├── views/               # Page components (Home, Clip, Download, About)
+├── views/               # Page components (Home, Clip, Transcode, Merge, Download, About)
+├── components/          # Shared components (VideoToolsNav)
 ├── assets/              # Static assets (images, icons)
 └── style.css            # Global styles
 ```
@@ -24,7 +25,8 @@ src/
 | Vue app setup | src/main.js | Element Plus + icons registration |
 | Navigation & layout | src/App.vue | Dropdown menu + router-view + transitions |
 | Route definitions | src/router/index.js | Lazy-loaded components + title guards |
-| Video processing | src/views/Clip.vue | FFmpeg integration + file handling |
+| Video processing | src/views/Clip.vue, src/views/Transcode.vue, src/views/Merge.vue | FFmpeg integration + file operations |
+| Shared Navigation | src/components/VideoToolsNav.vue | Top nav bar for video tools |
 | Tool cards grid | src/views/Home.vue | Navigation cards for each tool |
 
 ## CONVENTIONS

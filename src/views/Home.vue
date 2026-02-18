@@ -39,6 +39,28 @@
         </div>
       </el-card>
 
+      <!-- 工具卡片 3: 批量转码 -->
+      <el-card class="tool-card" shadow="hover" @click="$router.push('/transcode')">
+        <div class="card-content">
+          <div class="icon-box">🔄</div>
+          <div class="info">
+            <h3>Web 批量转码 (Transcode)</h3>
+            <p>支持多文件批量转格式、提取音频 (MP3/AAC/WAV)，支持 Copy 流极速模式。</p>
+          </div>
+        </div>
+      </el-card>
+
+      <!-- 工具卡片 4: 合并媒体 -->
+      <el-card class="tool-card" shadow="hover" @click="$router.push('/merge')">
+        <div class="card-content">
+          <div class="icon-box">🔗</div>
+          <div class="info">
+            <h3>Web 媒体合并 (Merge)</h3>
+            <p>无损极速合并多个视频/音频片段 (Concat)，要求所有文件格式参数一致。</p>
+          </div>
+        </div>
+      </el-card>
+
       <!-- 占位卡片：未来添加 -->
       <el-card class="tool-card disabled" shadow="none">
         <div class="card-content">

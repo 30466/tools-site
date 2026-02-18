@@ -13,13 +13,25 @@ const router = createRouter({
       path: '/download',
       name: 'download',
       component: () => import('../views/Download.vue'),
-      meta: { title: 'APP 下载' }
+      meta: { title: '小偶像音乐 APP' }
     },
     {
       path: '/clip',
       name: 'clip',
       component: () => import('../views/Clip.vue'),
       meta: { title: '批量剪切' }
+    },
+    {
+      path: '/transcode',
+      name: 'transcode',
+      component: () => import('../views/Transcode.vue'),
+      meta: { title: '批量转码' }
+    },
+    {
+      path: '/merge',
+      name: 'merge',
+      component: () => import('../views/Merge.vue'),
+      meta: { title: '合并媒体' }
     },
     {
       path: '/member-archive',
