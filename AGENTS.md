@@ -57,6 +57,7 @@ Tests:
   - FFmpeg batch transcoder: `src/views/Transcode.vue`
   - FFmpeg media merger: `src/views/Merge.vue`
   - About/links/contact: `src/views/About.vue`
+  - External tools: 口袋48历史记录查询, 字幕/弹幕唱歌检测 (linked from Home)
 - Vite config (COOP/COEP + ffmpeg optimizeDeps exclude): `vite.config.js`
 - Static assets:
   - FFmpeg core: `public/ffmpeg/ffmpeg-core.js`, `public/ffmpeg/ffmpeg-core.wasm`

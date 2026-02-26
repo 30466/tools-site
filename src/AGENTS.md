@@ -26,8 +26,9 @@ src/
 | Navigation & layout | src/App.vue | Dropdown menu + router-view + transitions |
 | Route definitions | src/router/index.js | Lazy-loaded components + title guards |
 | Video processing | src/views/Clip.vue, src/views/Transcode.vue, src/views/Merge.vue | FFmpeg integration + file operations |
+| APK distribution | src/views/Download.vue, src/views/MemberArchive.vue | Timeline + version management |
 | Shared Navigation | src/components/VideoToolsNav.vue | Top nav bar for video tools |
-| Tool cards grid | src/views/Home.vue | Navigation cards for each tool |
+| Tool cards grid | src/views/Home.vue | Navigation cards + external links |
 
 ## CONVENTIONS
 - **Component style**: Vue 3 Composition API with `<script setup>`

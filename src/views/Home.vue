@@ -28,52 +28,69 @@
         </div>
       </el-card>
 
-      <!-- 工具卡片 2: 批量剪切 -->
+      <!-- 工具卡片 2: 口袋48历史记录查询 -->
+      <el-card class="tool-card" shadow="hover" @click="openExternal('https://msg48.org/')">
+        <div class="card-content">
+          <div class="icon-box">💬</div>
+          <div class="info">
+            <h3>口袋48历史记录查询</h3>
+            <p>查询口袋48房间消息、直播电台回放、口袋48 ID查成分、翻牌字数。</p>
+          </div>
+        </div>
+      </el-card>
+
+      <!-- 工具卡片 3: 批量剪切 -->
       <el-card class="tool-card" shadow="hover" @click="$router.push('/clip')">
         <div class="card-content">
           <div class="icon-box">✂️</div>
           <div class="info">
-            <h3>Web 批量剪切 (Clip)</h3>
+            <h3>Web 批量剪切</h3>
             <p>导入视频和切片本(TXT)，在浏览器内直接完成批量裁剪并打包下载。</p>
           </div>
         </div>
       </el-card>
 
-      <!-- 工具卡片 3: 批量转码 -->
+      <!-- 工具卡片 4: 批量转码 -->
       <el-card class="tool-card" shadow="hover" @click="$router.push('/transcode')">
         <div class="card-content">
           <div class="icon-box">🔄</div>
           <div class="info">
-            <h3>Web 批量转码 (Transcode)</h3>
+            <h3>Web 批量转码</h3>
             <p>支持多文件批量转格式、提取音频 (MP3/AAC/WAV)，支持 Copy 流极速模式。</p>
           </div>
         </div>
       </el-card>
 
-      <!-- 工具卡片 4: 合并媒体 -->
+      <!-- 工具卡片 5: 合并媒体 -->
       <el-card class="tool-card" shadow="hover" @click="$router.push('/merge')">
         <div class="card-content">
           <div class="icon-box">🔗</div>
           <div class="info">
-            <h3>Web 媒体合并 (Merge)</h3>
+            <h3>Web 媒体合并</h3>
             <p>无损极速合并多个视频/音频片段 (Concat)，要求所有文件格式参数一致。</p>
           </div>
         </div>
       </el-card>
 
-      <!-- 占位卡片：未来添加 -->
-      <el-card class="tool-card disabled" shadow="none">
+      <!-- 工具卡片 6: 字幕/弹幕唱歌检测 -->
+      <el-card class="tool-card" shadow="hover" @click="openExternal('https://sd.abm48.com/')">
         <div class="card-content">
-          <div class="icon-box" style="filter: grayscale(1);">🚧</div>
+          <div class="icon-box">🎤</div>
           <div class="info">
-            <h3>更多工具开发中...</h3>
-            <p>敬请期待 ffmpeg 格式转换、音频提取等功能。</p>
+            <h3>字幕/弹幕唱歌检测</h3>
+            <p>根据字幕文件或弹幕文件判断并检测唱歌时间段。</p>
           </div>
         </div>
       </el-card>
     </div>
   </div>
 </template>
+
+<script setup>
+const openExternal = (url) => {
+  window.open(url, '_blank')
+}
+</script>
 
 <style scoped>
 .welcome-card {

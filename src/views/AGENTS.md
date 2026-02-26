@@ -10,8 +10,9 @@ Vue 3 single-page components with distinct domains: Home (tool dashboard), Downl
 ## STRUCTURE
 ```
 src/views/
-├── Home.vue         # Tool navigation cards grid + welcome
+├── Home.vue         # Tool navigation cards grid + external links
 ├── Download.vue     # APK distribution timeline + version management
+├── MemberArchive.vue # SNH48 GROUP 档案 APP 分发 + version management
 ├── Clip.vue         # FFmpeg WASM video processing + batch operations
 ├── Transcode.vue    # Batch transcoding + audio extraction
 ├── Merge.vue        # Media concatenation (concat demuxer) + drag-drop sort
@@ -21,8 +22,8 @@ src/views/
 ## WHERE TO LOOK
 | Task | Location | Notes |
 |------|----------|-------|
-| Tool cards navigation | src/views/Home.vue | Grid layout with emoji icons + router navigation |
-| APK version management | src/views/Download.vue | Timeline component + download triggers + download counting |
+| Tool cards navigation | src/views/Home.vue | Grid layout with emoji icons + router + external links |
+| APK version management | src/views/Download.vue, src/views/MemberArchive.vue | Timeline component + download triggers + download counting |
 | FFmpeg video processing | src/views/Clip.vue, src/views/Transcode.vue, src/views/Merge.vue | WebAssembly integration + file operations |
 | Contact QR modal | src/views/About.vue | Dialog with dynamic QR image switching |
 
