@@ -22,6 +22,7 @@ dist-ssr
 # Uploaded binaries / server-only config
 public/apks/**/*.apk
 public/apks/config.php
+public/VideoEditingToolkit-Lite.zip
 
 # AI assistant config
 AGENTS.md

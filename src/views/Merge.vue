@@ -11,6 +11,12 @@
           </div>
     
           <div class="header-right">
+            <a href="/VideoEditingToolkit-Lite.zip" class="project-link">
+              <el-button type="primary" link>
+                <el-icon style="margin-right: 4px"><Download /></el-icon>
+                桌面版下载
+              </el-button>
+            </a>
             <a href="https://gitee.com/albert-chen04/video-editing-toolkit" target="_blank" class="project-link">
               <el-button type="primary" link>
                 <el-icon style="margin-right: 4px"><Link /></el-icon>
@@ -141,7 +147,7 @@ import { ref, computed, onMounted, nextTick, onBeforeUnmount } from 'vue';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile, toBlobURL } from '@ffmpeg/util';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { Delete, Connection, Link, Rank } from '@element-plus/icons-vue';
+import { Delete, Connection, Link, Rank, Download } from '@element-plus/icons-vue';
 import VideoToolsNav from '@/components/VideoToolsNav.vue';
 import Sortable from 'sortablejs';
 

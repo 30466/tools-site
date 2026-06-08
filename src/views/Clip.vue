@@ -10,8 +10,13 @@
             <el-tag type="warning" effect="plain" round size="small" style="margin-left: 10px">Beta</el-tag>
           </div>
     
-          <!-- 新增：右侧的外链按钮 -->
           <div class="header-right">
+            <a href="/VideoEditingToolkit-Lite.zip" class="project-link">
+              <el-button type="primary" link>
+                <el-icon style="margin-right: 4px"><Download /></el-icon>
+                桌面版下载
+              </el-button>
+            </a>
             <a href="https://gitee.com/albert-chen04/video-editing-toolkit" target="_blank" class="project-link">
               <el-button type="primary" link>
                 <el-icon style="margin-right: 4px"><Link /></el-icon>
@@ -157,7 +162,7 @@ import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile, toBlobURL } from '@ffmpeg/util';
 import JSZip from 'jszip';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { VideoPlay, Document, Delete, Scissor, Link } from '@element-plus/icons-vue';
+import { VideoPlay, Document, Delete, Scissor, Link, Download } from '@element-plus/icons-vue';
 import VideoToolsNav from '@/components/VideoToolsNav.vue';
 
 // --- 状态变量 ---

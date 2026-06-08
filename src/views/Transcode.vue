@@ -11,6 +11,12 @@
           </div>
     
           <div class="header-right">
+            <a href="/VideoEditingToolkit-Lite.zip" class="project-link">
+              <el-button type="primary" link>
+                <el-icon style="margin-right: 4px"><Download /></el-icon>
+                桌面版下载
+              </el-button>
+            </a>
             <a href="https://gitee.com/albert-chen04/video-editing-toolkit" target="_blank" class="project-link">
               <el-button type="primary" link>
                 <el-icon style="margin-right: 4px"><Link /></el-icon>
@@ -140,7 +146,7 @@ import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile, toBlobURL } from '@ffmpeg/util';
 import JSZip from 'jszip';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { FolderAdd, Delete, Refresh, Link } from '@element-plus/icons-vue';
+import { FolderAdd, Delete, Refresh, Link, Download } from '@element-plus/icons-vue';
 import VideoToolsNav from '@/components/VideoToolsNav.vue';
 
 // --- 状态变量 ---
