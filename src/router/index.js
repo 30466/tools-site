@@ -39,13 +39,6 @@ const router = createRouter({
       component: () => import('../views/MemberArchive.vue'),
       meta: { title: '成员档案 APP' }
     },
-    {
-      path: '/about',
-      name: 'about',
-      // 你后面自己去复制内容到这个文件
-      component: () => import('../views/About.vue'),
-      meta: { title: '关于' }
-    }
   ]
 })
 

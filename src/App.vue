@@ -24,8 +24,6 @@
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
-            <router-link to="/about">关于</router-link>
-            
             <!-- 2. 修改：返回应援站 (下拉菜单) -->
             <el-dropdown class="site-dropdown" :show-timeout="100">
               <span class="site-dropdown-link">

@@ -10,7 +10,6 @@
 - `/clip` 导入切片本批量剪切（FFmpeg WASM，本地处理并打包 ZIP 下载）
 - `/transcode` 批量转码（支持音频提取、格式转换、极速模式）
 - `/merge` 媒体合并（支持无损极速合并、拖拽排序、内存超限保护）
-- `/about` 关于 / 友情链接
 
 **首页外部链接卡片：**
 
@@ -102,7 +101,7 @@ FFmpeg 核心文件从站点路径加载：
 │   ├── App.vue
 │   ├── router/index.js
 │   ├── components/      # 公共组件 (VideoToolsNav)
-│   └── views/           # Home / Download / MemberArchive / Clip / Transcode / Merge / About
+│   └── views/           # Home / Download / MemberArchive / Clip / Transcode / Merge
 ├── public/
 │   ├── ffmpeg/          # ffmpeg-core.js / ffmpeg-core.wasm
 │   ├── apks/            # APK 分发与上传接口
