@@ -23,6 +23,10 @@ dist-ssr
 public/apks/**/*.apk
 public/apks/config.php
 
+# AI assistant config
+AGENTS.md
+CLAUDE.md
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -8,13 +8,22 @@
           <span class="logo">abm48工具箱 🛠️</span>
           
           <div class="links">
-            <!-- 1. 站内导航 -->
-            <router-link to="/">首页</router-link>
-            <!-- 新增：小偶像音乐网站 -->
-            <a href="https://abm48.com/" target="_blank">小偶像音乐网站</a>
-            <!-- 新增：成员档案 -->
-            <a href="https://snh48wiki.top/" target="_blank">成员档案</a>
-            <!-- 新增：关于页面 -->
+            <!-- 1. 首页下拉菜单 -->
+            <el-dropdown class="site-dropdown" :show-timeout="100">
+              <span class="site-dropdown-link" @click="router.push('/')">
+                首页
+                <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+              </span>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item @click="scrollToSection('section-websites')">📌 推荐网站</el-dropdown-item>
+                  <el-dropdown-item @click="scrollToSection('section-apps')">📌 APP 下载</el-dropdown-item>
+                  <el-dropdown-item @click="scrollToSection('section-tools')">📌 剪辑工具</el-dropdown-item>
+                  <el-dropdown-item @click="scrollToSection('section-support')">📌 应援站</el-dropdown-item>
+                  <el-dropdown-item @click="scrollToSection('section-contact')">💬 联系我</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
             <router-link to="/about">关于</router-link>
             
             <!-- 2. 修改：返回应援站 (下拉菜单) -->
@@ -64,7 +73,7 @@
 
 <script setup>
 import { computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ElConfigProvider } from 'element-plus'
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import { HomeFilled, ArrowDown } from '@element-plus/icons-vue'
@@ -73,6 +82,16 @@ import { HomeFilled, ArrowDown } from '@element-plus/icons-vue'
 import bgImage from './assets/bg.jpg'
 
 const route = useRoute()
+const router = useRouter()
+
+const scrollToSection = (id) => {
+  if (route.path !== '/') {
+    router.push({ path: '/', hash: '#' + id })
+  } else {
+    const el = document.getElementById(id)
+    if (el) el.scrollIntoView({ behavior: 'smooth' })
+  }
+}
 
 // 页面内部左上角的 Logo 文字 (和浏览器标签页标题区分开，这里可以保持你喜欢的样式)
 const currentLogoTitle = computed(() => {
