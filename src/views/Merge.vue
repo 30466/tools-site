@@ -115,6 +115,33 @@
           </div>
         </div>
 
+        <!-- FFmpeg 核心加载区 -->
+        <div class="ffmpeg-status">
+          <template v-if="!isFFmpegLoaded">
+            <el-button
+              type="warning"
+              size="large"
+              :loading="isFFmpegLoading"
+              @click="loadFFmpeg"
+              style="width: 100%"
+            >
+              <template v-if="isFFmpegLoading">
+                ⏳ 正在加载 FFmpeg 核心 (约 30MB，首次需等待)...
+              </template>
+              <template v-else>
+                🚀 先点击加载 FFmpeg 核心（合并引擎）
+              </template>
+            </el-button>
+          </template>
+          <el-alert
+            v-else
+            title="✅ FFmpeg 核心已就绪，可以进行合并操作"
+            type="success"
+            show-icon
+            :closable="false"
+          />
+        </div>
+
         <div class="action-btn">
           <el-button 
             type="primary" 
@@ -143,23 +170,37 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick, onBeforeUnmount } from 'vue';
-import { FFmpeg } from '@ffmpeg/ffmpeg';
-import { fetchFile, toBlobURL } from '@ffmpeg/util';
+import { ref, computed, onMounted, nextTick, onBeforeUnmount, watchEffect } from 'vue';
+import { fetchFile } from '@ffmpeg/util';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { Delete, Connection, Link, Rank, Download } from '@element-plus/icons-vue';
 import VideoToolsNav from '@/components/VideoToolsNav.vue';
 import Sortable from 'sortablejs';
+import { FFmpegManager } from '@/composables/useFFmpeg';
 
 // --- 状态变量 ---
-const ffmpeg = new FFmpeg();
+const crossOriginIsolated = window.crossOriginIsolated;
 const fileList = ref([]);
 const outputName = ref('merged_output');
 const isProcessing = ref(false);
 const logs = ref(['⏳ 等待加载 FFmpeg 核心组件...']);
 const logBoxRef = ref(null);
-const isFFmpegLoaded = ref(false);
 const selectedRow = ref(null);
+
+const addLog = (msg) => {
+  logs.value.push(msg);
+  nextTick(() => {
+    if (logBoxRef.value) logBoxRef.value.scrollTop = logBoxRef.value.scrollHeight;
+  });
+};
+
+const ffmpegMgr = new FFmpegManager(addLog);
+const isFFmpegLoaded = ref(false);
+const isFFmpegLoading = ref(false);
+watchEffect(() => {
+  isFFmpegLoaded.value = ffmpegMgr.isLoaded.value;
+  isFFmpegLoading.value = ffmpegMgr.isLoading.value;
+});
 
 // --- 计算属性 ---
 const totalSize = computed(() => {
@@ -181,35 +222,24 @@ const readyToStart = computed(() => {
 });
 
 // --- 初始化 FFmpeg ---
-onMounted(async () => {
-  // 1. 初始化拖拽排序
+onMounted(() => {
   initSortable();
-
-  try {
-    if (!window.crossOriginIsolated) {
-      addLog('⚠️ 警告: 浏览器“跨域隔离”未生效！(SharedArrayBuffer 不可用)');
-    }
-
-    const baseURL = '/ffmpeg';
-    addLog(`🔍 正在加载核心文件...`);
-
-    ffmpeg.on('log', ({ message }) => {
-      // addLog(`[FFmpeg] ${message}`);
-    });
-
-    await ffmpeg.load({
-      coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
-      wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
-    });
-
-    isFFmpegLoaded.value = true;
-    addLog('✅ FFmpeg 组件加载完成！准备就绪。');
-    
-  } catch (error) {
-    console.error(error);
-    addLog(`❌ FFmpeg 加载失败: ${error.message}`);
+  if (!crossOriginIsolated) {
+    addLog('ℹ️ 跨域隔离未完全生效（不影响基本功能，FFmpeg 仍可正常工作）');
   }
 });
+
+function loadFFmpeg() {
+  ffmpegMgr.load()
+}
+
+function isFFmpegAlive() {
+  return ffmpegMgr.isAlive()
+}
+
+async function restartFFmpeg() {
+  await ffmpegMgr.restart()
+}
 
 // --- 拖拽排序逻辑 ---
 const initSortable = () => {
@@ -317,14 +347,14 @@ const startMerge = async () => {
       
       addLog(`Writing file: ${item.name} -> ${safeName}`);
       const fileData = await fetchFile(item.file);
-      await ffmpeg.writeFile(safeName, fileData);
+      await ffmpegMgr.ffmpeg.writeFile(safeName, fileData);
 
       // 构建 concat 列表格式: file 'filename'
       concatList += `file '${safeName}'\n`;
     }
 
     // 2. 写入 concat.txt
-    await ffmpeg.writeFile('concat.txt', concatList);
+    await ffmpegMgr.ffmpeg.writeFile('concat.txt', concatList);
     addLog('📝 生成 concat.txt 列表文件');
 
     // 3. 执行合并命令 (使用 concat demuxer)
@@ -338,11 +368,11 @@ const startMerge = async () => {
     ];
 
     addLog(`⚙️ 执行 FFmpeg 命令: ffmpeg ${cmd.join(' ')}`);
-    await ffmpeg.exec(cmd);
+    await ffmpegMgr.ffmpeg.exec(cmd);
 
     // 4. 读取并下载结果
     addLog('📦 读取输出文件...');
-    const data = await ffmpeg.readFile(outFileName);
+    const data = await ffmpegMgr.ffmpeg.readFile(outFileName);
     
     const blob = new Blob([data.buffer], { type: 'video/mp4' }); // 类型其实不重要，浏览器会自动识别
     const downloadUrl = URL.createObjectURL(blob);
@@ -356,10 +386,10 @@ const startMerge = async () => {
     ElMessage.success('合并成功！');
 
     // 5. 清理
-    await ffmpeg.deleteFile('concat.txt');
-    await ffmpeg.deleteFile(outFileName);
+    await ffmpegMgr.ffmpeg.deleteFile('concat.txt');
+    await ffmpegMgr.ffmpeg.deleteFile(outFileName);
     for (let i = 0; i < fileList.value.length; i++) {
-        await ffmpeg.deleteFile(`input_${i}.${targetExt.value}`);
+        await ffmpegMgr.ffmpeg.deleteFile(`input_${i}.${targetExt.value}`);
     }
 
   } catch (err) {
@@ -371,13 +401,6 @@ const startMerge = async () => {
   }
 };
 
-// --- 辅助函数 ---
-const addLog = (msg) => {
-  logs.value.push(msg);
-  nextTick(() => {
-    if (logBoxRef.value) logBoxRef.value.scrollTop = logBoxRef.value.scrollHeight;
-  });
-};
 </script>
 
 <style scoped>

@@ -113,6 +113,33 @@
           </div>
         </div>
 
+        <!-- FFmpeg 核心加载区 -->
+        <div class="ffmpeg-status">
+          <template v-if="!isFFmpegLoaded">
+            <el-button
+              type="warning"
+              size="large"
+              :loading="isFFmpegLoading"
+              @click="loadFFmpeg"
+              style="width: 100%"
+            >
+              <template v-if="isFFmpegLoading">
+                ⏳ 正在加载 FFmpeg 核心 (约 30MB，首次需等待)...
+              </template>
+              <template v-else>
+                🚀 先点击加载 FFmpeg 核心（转码引擎）
+              </template>
+            </el-button>
+          </template>
+          <el-alert
+            v-else
+            title="✅ FFmpeg 核心已就绪，可以进行转码操作"
+            type="success"
+            show-icon
+            :closable="false"
+          />
+        </div>
+
         <div class="action-btn">
           <el-button 
             type="primary" 
@@ -141,16 +168,16 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick, watch } from 'vue';
-import { FFmpeg } from '@ffmpeg/ffmpeg';
-import { fetchFile, toBlobURL } from '@ffmpeg/util';
+import { ref, computed, onMounted, nextTick, watch, watchEffect } from 'vue';
+import { fetchFile } from '@ffmpeg/util';
 import JSZip from 'jszip';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { FolderAdd, Delete, Refresh, Link, Download } from '@element-plus/icons-vue';
 import VideoToolsNav from '@/components/VideoToolsNav.vue';
+import { FFmpegManager } from '@/composables/useFFmpeg';
 
 // --- 状态变量 ---
-const ffmpeg = new FFmpeg();
+const crossOriginIsolated = window.crossOriginIsolated;
 const fileList = ref([]);
 const transcodeMode = ref('copy');
 const targetFormat = ref('mp4');
@@ -158,7 +185,21 @@ const isProcessing = ref(false);
 const progress = ref(0);
 const logs = ref(['⏳ 等待加载 FFmpeg 核心组件...']);
 const logBoxRef = ref(null);
+
+const addLog = (msg) => {
+  logs.value.push(msg);
+  nextTick(() => {
+    if (logBoxRef.value) logBoxRef.value.scrollTop = logBoxRef.value.scrollHeight;
+  });
+};
+
+const ffmpegMgr = new FFmpegManager(addLog);
 const isFFmpegLoaded = ref(false);
+const isFFmpegLoading = ref(false);
+watchEffect(() => {
+  isFFmpegLoaded.value = ffmpegMgr.isLoaded.value;
+  isFFmpegLoading.value = ffmpegMgr.isLoading.value;
+});
 
 // --- 计算属性 ---
 const isAudioTarget = computed(() => {
@@ -182,34 +223,23 @@ watch(targetFormat, (newVal) => {
 });
 
 // --- 初始化 FFmpeg ---
-onMounted(async () => {
-  try {
-    if (!window.crossOriginIsolated) {
-      addLog('⚠️ 警告: 浏览器“跨域隔离”未生效！(SharedArrayBuffer 不可用)');
-    }
-
-    const baseURL = '/ffmpeg';
-    addLog(`🔍 正在加载核心文件...`);
-
-    ffmpeg.on('log', ({ message }) => {
-      if (!message.startsWith('frame=')) {
-        // addLog(`[FFmpeg] ${message}`); // 日志太多，暂时屏蔽详细内核日志
-      }
-    });
-
-    await ffmpeg.load({
-      coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
-      wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
-    });
-
-    isFFmpegLoaded.value = true;
-    addLog('✅ FFmpeg 组件加载完成！准备就绪。');
-    
-  } catch (error) {
-    console.error(error);
-    addLog(`❌ FFmpeg 加载失败: ${error.message}`);
+onMounted(() => {
+  if (!crossOriginIsolated) {
+    addLog('ℹ️ 跨域隔离未完全生效（不影响基本功能，FFmpeg 仍可正常工作）');
   }
 });
+
+function loadFFmpeg() {
+  ffmpegMgr.load()
+}
+
+function isFFmpegAlive() {
+  return ffmpegMgr.isAlive()
+}
+
+async function restartFFmpeg() {
+  await ffmpegMgr.restart()
+}
 
 // --- 文件操作 ---
 const triggerFileUpload = () => document.getElementById('transcode-uploader').click();
@@ -284,7 +314,7 @@ const startBatchTranscode = async () => {
       try {
         // 1. 写入文件
         const fileData = await fetchFile(item.file);
-        await ffmpeg.writeFile(inputName, fileData);
+        await ffmpegMgr.ffmpeg.writeFile(inputName, fileData);
 
         // 2. 构建命令
         let cmd = ['-i', inputName];
@@ -315,15 +345,19 @@ const startBatchTranscode = async () => {
         cmd.push(outputName);
 
         // 3. 执行
-        await ffmpeg.exec(cmd);
+        await ffmpegMgr.ffmpeg.exec(cmd);
 
         // 4. 读取结果
-        const data = await ffmpeg.readFile(outputName);
+        const data = await ffmpegMgr.ffmpeg.readFile(outputName);
         outputFolder.file(finalFileName, data);
         
         // 5. 清理
-        await ffmpeg.deleteFile(inputName);
-        await ffmpeg.deleteFile(outputName);
+        await ffmpegMgr.ffmpeg.deleteFile(inputName);
+        await ffmpegMgr.ffmpeg.deleteFile(outputName);
+
+        if (!(await isFFmpegAlive())) {
+          await restartFFmpeg();
+        }
 
         item.status = 'done';
         item.statusText = '完成';
@@ -335,7 +369,7 @@ const startBatchTranscode = async () => {
         item.statusText = '失败';
         addLog(`❌ 处理失败 ${item.name}: ${err.message}`);
         // 尝试清理 input，防止内存泄漏
-        try { await ffmpeg.deleteFile(inputName); } catch (e) {}
+        try { await ffmpegMgr.ffmpeg.deleteFile(inputName); } catch (e) {}
       }
 
       progress.value = Math.round(((i + 1) / fileList.value.length) * 100);
@@ -366,13 +400,6 @@ const startBatchTranscode = async () => {
   }
 };
 
-// --- 辅助函数 ---
-const addLog = (msg) => {
-  logs.value.push(msg);
-  nextTick(() => {
-    if (logBoxRef.value) logBoxRef.value.scrollTop = logBoxRef.value.scrollHeight;
-  });
-};
 </script>
 
 <style scoped>
