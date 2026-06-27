@@ -37,3 +37,19 @@ CLAUDE.md
 *.njsproj
 *.sln
 *.sw?
+
+# Playwright test artifacts
+.playwright-mcp/
+
+# SQLite databases
+database.db
+database.db-shm
+database.db-wal
+
+# PHP legacy files (migrated to Node.js backend)
+public/apks/abm48/count.php
+public/apks/abm48/upload.php
+public/apks/member_archive/count.php
+public/apks/member_archive/upload.php
+public/apks/config.example.php
+public/apks/.htaccess
