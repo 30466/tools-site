@@ -262,11 +262,13 @@
     <!-- 二维码弹窗 -->
     <el-dialog
       v-model="qrVisible"
-      :title="qrTitle"
       width="340px"
       center
       class="qr-dialog"
     >
+      <template #header>
+        <span class="dialog-title">{{ qrTitle }}</span>
+      </template>
       <div class="qr-container">
         <img :src="currentQrImg" alt="QR Code" class="qr-image" />
         <p class="qr-desc">扫一扫上面二维码图案，加我为朋友。</p>
@@ -418,6 +420,15 @@ const showQrCode = (type) => {
 .contact-btn .el-icon { font-size: 20px; }
 
 .contact-btn { background-color: #204fa1; }
+
+/* 弹窗标题居中加粗 */
+:deep(.el-dialog__header) {
+  text-align: center;
+}
+.dialog-title {
+  font-weight: bold;
+  font-size: 18px;
+}
 
 /* 二维码弹窗 */
 .qr-container {
