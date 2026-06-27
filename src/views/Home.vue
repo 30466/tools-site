@@ -47,6 +47,36 @@
           </div>
         </div>
       </el-card>
+
+      <el-card class="tool-card" shadow="hover" @click="openExternal('https://www.snh48.com/')">
+        <div class="card-content">
+          <div class="icon-box">🏠</div>
+          <div class="info">
+            <h3>SNH48官网</h3>
+            <p>SNH48 GROUP官方网站，包含成员介绍、公演信息、新闻动态、口袋48 APP下载、历届总选排名及周边商品等。</p>
+          </div>
+        </div>
+      </el-card>
+
+      <el-card class="tool-card" shadow="hover" @click="openExternal('https://www.snh48.com/member_list.html#SNH')">
+        <div class="card-content">
+          <div class="icon-box">👤</div>
+          <div class="info">
+            <h3>官方成员简介</h3>
+            <p>SNH48 GROUP官方成员索引，可按分队查询在团成员详细资料。</p>
+          </div>
+        </div>
+      </el-card>
+
+      <el-card class="tool-card" shadow="hover" @click="openExternal('https://xox48.top/')">
+        <div class="card-content">
+          <div class="icon-box">📊</div>
+          <div class="info">
+            <h3>明票榜</h3>
+            <p>SNH48 GROUP明票投票榜单，查看成员实时排名数据。</p>
+          </div>
+        </div>
+      </el-card>
     </div>
 
     <!-- APP 下载 -->
@@ -71,6 +101,16 @@
           </div>
         </div>
       </el-card>
+
+      <el-card class="tool-card" shadow="hover" @click="openExternal('https://h5.48.cn/pocket48/index_pc.html')">
+        <div class="card-content">
+          <div class="icon-box">📱</div>
+          <div class="info">
+            <h3>口袋48 APP 官网下载</h3>
+            <p>SNH48 GROUP官方APP下载页，支持观看成员直播、公演直播及互动。</p>
+          </div>
+        </div>
+      </el-card>
     </div>
 
     <!-- 剪辑工具 -->
@@ -91,7 +131,7 @@
           <div class="icon-box">✂️</div>
           <div class="info">
             <h3>Web 批量剪切</h3>
-            <p>导入视频和切片本(TXT)，在浏览器内直接完成批量裁剪并打包下载。</p>
+            <p>浏览器端批量剪切：支持本地视频导入 + 口袋48直播回放在线剪切。</p>
           </div>
         </div>
       </el-card>
@@ -116,12 +156,58 @@
         </div>
       </el-card>
 
-      <el-card class="tool-card" shadow="hover" @click="openExternal('https://sd.abm48.com/')">
+    </div>
+
+    <!-- Skills -->
+    <h2 class="section-title" id="section-skills">📌 Skills</h2>
+    <p class="section-hint">终端 AI Agent skill，纯语言解决以下问题：</p>
+    <div class="tools-grid">
+      <el-card class="tool-card" shadow="hover" @click="openExternal('https://gitee.com/albert-chen04/pocket48-replays-skills')">
+        <div class="card-content">
+          <div class="icon-box">💾</div>
+          <div class="info">
+            <h3>口袋48录播下载</h3>
+            <p>口袋48录播回放相关下载与查询</p>
+          </div>
+        </div>
+      </el-card>
+
+      <el-card class="tool-card" shadow="hover" @click="openExternal('https://gitee.com/albert-chen04/media-batch-clip-skills')">
+        <div class="card-content">
+          <div class="icon-box">✂️</div>
+          <div class="info">
+            <h3>批量剪切</h3>
+            <p>批量剪切（包括口袋48录播批量剪切，无需下载录播文件）</p>
+          </div>
+        </div>
+      </el-card>
+
+      <el-card class="tool-card" shadow="hover" @click="openExternal('https://gitee.com/albert-chen04/pocket48-danmaku-analysis-skills')">
         <div class="card-content">
           <div class="icon-box">🎤</div>
           <div class="info">
-            <h3>字幕/弹幕唱歌检测</h3>
-            <p>根据字幕文件或弹幕文件判断并检测唱歌时间段。</p>
+            <h3>弹幕唱歌检测</h3>
+            <p>口袋48弹幕文件检测唱歌片段</p>
+          </div>
+        </div>
+      </el-card>
+
+      <el-card class="tool-card" shadow="hover" @click="openExternal('https://gitee.com/albert-chen04/albert-music-upload-skills')">
+        <div class="card-content">
+          <div class="icon-box">🎵</div>
+          <div class="info">
+            <h3>音乐批量上传</h3>
+            <p>批量上传音频到小偶像音乐网站</p>
+          </div>
+        </div>
+      </el-card>
+
+      <el-card class="tool-card" shadow="hover" @click="openExternal('https://gitee.com/albert-chen04/clip-record-upload-skills')">
+        <div class="card-content">
+          <div class="icon-box">📋</div>
+          <div class="info">
+            <h3>切片本上传</h3>
+            <p>批量上传唱歌切片本到切片本网站</p>
           </div>
         </div>
       </el-card>
