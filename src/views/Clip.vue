@@ -229,7 +229,7 @@ import { ref, computed, onMounted, nextTick, watch, watchEffect } from 'vue';
 import { fetchFile } from '@ffmpeg/util';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { VideoPlay, Document, Delete, Scissor, Link, Download, MagicStick, Cpu } from '@element-plus/icons-vue';
-import JSZip from 'jszip';
+
 import VideoToolsNav from '@/components/VideoToolsNav.vue';
 import Pocket48Panel from '@/components/Pocket48Panel.vue';
 import * as p48 from '@/api/pocket48';
@@ -378,8 +378,16 @@ const startBatchClip = async () => {
     await ffmpegMgr.ffmpeg.writeFile(inputName, videoData);
     addLog('✅ 载入完成，开始处理...');
 
-    const completedClips = [];
+    let completedCount = 0;
     const failedClips = [];
+
+    let recordContent = `--- 批量裁剪记录 ---\n`;
+    recordContent += `源文件: ${videoFile.value.name}\n\n`;
+    clipList.value.forEach(clip => {
+      recordContent += `名称: ${clip.name}\n`;
+      recordContent += `开始: ${clip.start}\n`;
+      recordContent += `结束: ${clip.end}\n\n`;
+    });
 
     for (let i = 0; i < clipList.value.length; i++) {
       try {
@@ -413,8 +421,9 @@ const startBatchClip = async () => {
         }
 
         const data = await ffmpegMgr.ffmpeg.readFile(outputName);
-        completedClips.push({ name: safeName, data, ext: outExt });
+        downloadBlob(data, safeName + outExt);
         await ffmpegMgr.ffmpeg.deleteFile(outputName);
+        completedCount++;
 
         progress.value = Math.round(((i + 1) / clipList.value.length) * 100);
       } catch (e) {
@@ -431,44 +440,12 @@ const startBatchClip = async () => {
       addLog(`⚠️ ${failedClips.length} 个片段失败: ${failedClips.map(c => c.name).join(', ')}`);
     }
 
-    if (completedClips.length === 0) {
+    if (completedCount === 0) {
       addLog('❌ 没有成功处理的片段');
       ElMessage.error('所有片段处理失败');
     } else {
-      const totalBytes = completedClips.reduce((a, c) => a + c.data.byteLength, 0);
-      const totalMB = totalBytes / 1024 / 1024;
-      const ZIP_THRESHOLD = 900 * 1024 * 1024;
-
-      // 生成切片记录
-      let recordContent = `--- 批量裁剪记录 ---\n`;
-      recordContent += `源文件: ${videoFile.value.name}\n\n`;
-      clipList.value.forEach(clip => {
-        recordContent += `名称: ${clip.name}\n`;
-        recordContent += `开始: ${clip.start}\n`;
-        recordContent += `结束: ${clip.end}\n\n`;
-      });
-
-      addLog(`📦 ${completedClips.length} 个片段，总大小 ${totalMB.toFixed(1)} MB`);
-
-      if (totalBytes <= ZIP_THRESHOLD) {
-        addLog('📦 正在打包 zip...');
-        const zip = new JSZip();
-        for (const clip of completedClips) {
-          zip.file(`${clip.name}${clip.ext}`, clip.data);
-        }
-        zip.file('_clip_record.txt', recordContent);
-        const zipBlob = await zip.generateAsync({ type: 'blob' });
-        downloadBlob(zipBlob, `clips_${videoFile.value.name.replace(/\.[^.]+$/, '')}.zip`);
-        addLog(`✅ zip 打包完成 (${(zipBlob.size / 1024 / 1024).toFixed(1)} MB)`);
-      } else {
-        addLog(`⚠️ 总大小 ${totalMB.toFixed(1)} MB 超过 500MB 阈值，改为逐个下载`);
-        for (const clip of completedClips) {
-          downloadBlob(clip.data, `${clip.name}${clip.ext}`);
-        }
-        downloadBlob(new Blob([recordContent], { type: 'text/plain;charset=utf-8' }), '_clip_record.txt');
-      }
-
-      const summary = `🎉 完成！成功 ${completedClips.length}/${clipList.value.length}`;
+      downloadBlob(new Blob([recordContent], { type: 'text/plain;charset=utf-8' }), '_clip_record.txt');
+      const summary = `🎉 完成！成功 ${completedCount}/${clipList.value.length}`;
       addLog(summary);
       ElMessage.success(summary);
     }
@@ -497,37 +474,65 @@ const handleP48StartClip = async (payload) => {
 
     const format = payload.format || 'ts';
     const isAudio = ['mp3', 'm4a', 'flac', 'wav', 'aac', 'opus', 'ogg'].includes(format);
-    const completedClips = [];
+    let completedCount = 0;
     const failedClips = [];
+
+    let recordContent = `--- 批量裁剪记录 ---\n`;
+    recordContent += `源: 口袋48 ${payload.member} ${payload.broadcastTime}\n`;
+    recordContent += `M3U8: ${payload.m3u8Url}\n\n`;
+    payload.clips.forEach(c => {
+      recordContent += `名称: ${c.name}\n`;
+      recordContent += `开始: ${c.start}\n`;
+      recordContent += `结束: ${c.end}\n\n`;
+    });
 
     const PATH_LABELS = ['CDN', '后端', '直连']
 
-    async function fetchSeg(url) {
-      const ctrl = new AbortController()
-      const tid = setTimeout(() => ctrl.abort(), 30000)
-      const SOURCES = [p48.proxyCDN(url), p48.proxySegment(url), url]
+    async function fetchSeg(url, index, total) {
+      const pad = String(total).length
+      const prefix = `  [${String(index+1).padStart(pad, ' ')}/${total}]`
+      const MAX_RETRIES = 5
+      const TIMEOUTS = [5000, 5000, 5000, 8000, 10000]
 
-      const doFetch = async (fetchUrl, label) => {
-        const resp = await fetch(fetchUrl, { signal: ctrl.signal })
-        if (!resp.ok) {
-          let msg = `HTTP ${resp.status}`
-          try { const body = await resp.json(); msg += `: ${body.error}` } catch {}
-          throw new Error(msg)
+      for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+        const ctrl = new AbortController()
+        const tid = setTimeout(() => ctrl.abort(), TIMEOUTS[attempt])
+        // 前两次直连（避免三路并发拥塞），第三次起三路竞速
+        const SOURCES = attempt < 2
+          ? [{ url, label: '直连' }]
+          : [{ url: p48.proxyCDN(url), label: 'CDN' }, { url: p48.proxySegment(url), label: '后端' }, { url, label: '直连' }]
+        const t0 = performance.now()
+
+        const doFetch = async (fetchUrl, label) => {
+          const resp = await fetch(fetchUrl, { signal: ctrl.signal })
+          if (!resp.ok) {
+            let msg = `HTTP ${resp.status}`
+            try { const body = await resp.json(); msg += `: ${body.error}` } catch {}
+            throw new Error(msg)
+          }
+          return { label, data: await resp.arrayBuffer() }
         }
-        return { label, data: await resp.arrayBuffer() }
-      }
 
-      try {
-        const result = await Promise.any(SOURCES.map((u, i) => doFetch(u, PATH_LABELS[i])))
-        return result
-      } catch (e) {
-        const msgs = e instanceof AggregateError
-          ? e.errors.map(err => err.message).join('; ')
-          : e.message
-        throw new Error(msgs)
-      } finally {
-        clearTimeout(tid)
-        ctrl.abort()
+        try {
+          const result = await Promise.any(SOURCES.map(s => doFetch(s.url, s.label)))
+          const elapsed = (performance.now() - t0).toFixed(0)
+          const retryTag = attempt > 0 ? ` (重试${attempt})` : ''
+          addLog(`${prefix} ✅ ${result.label} ${elapsed}ms${retryTag}`)
+          return result
+        } catch (e) {
+          const msgs = e instanceof AggregateError
+            ? e.errors.map(err => err.message).join('; ')
+            : e.message
+          if (attempt < MAX_RETRIES - 1) {
+            addLog(`${prefix} ⚠️ 失败: ${msgs}，重试 ${attempt+1}/${MAX_RETRIES-1}`)
+          } else {
+            addLog(`${prefix} ❌ 最终失败: ${msgs}`)
+            throw new Error(msgs)
+          }
+        } finally {
+          clearTimeout(tid)
+          ctrl.abort()
+        }
       }
     }
 
@@ -562,15 +567,29 @@ const handleP48StartClip = async (payload) => {
 
       addLog(`  需下载 ${neededSegs.length} 个分片`);
 
-      // Download segments in parallel (concurrency 6), 统计每条路径成功数
-      const buffers = [];
+      // Download segments via sliding window pool
+      const buffers = new Array(neededSegs.length);
       const pathWins = { CDN: 0, '后端': 0, '直连': 0 };
-      const concurrency = 6;
-      for (let j = 0; j < neededSegs.length; j += concurrency) {
-        const batch = neededSegs.slice(j, j + concurrency);
-        const results = await Promise.all(batch.map(seg => fetchSeg(seg.url)));
-        for (const r of results) { pathWins[r.label]++; buffers.push(r.data); }
+      const concurrency = payload.concurrency || 20;
+      let nextIdx = 0;
+
+      const worker = async () => {
+        while (true) {
+          const idx = nextIdx;
+          nextIdx++;
+          if (idx >= neededSegs.length) break;
+          const result = await fetchSeg(neededSegs[idx].url, idx, neededSegs.length);
+          pathWins[result.label]++;
+          buffers[idx] = result.data;
+        }
+      };
+
+      const workers = [];
+      const workerCount = Math.min(concurrency, neededSegs.length);
+      for (let w = 0; w < workerCount; w++) {
+        workers.push(worker());
       }
+      await Promise.all(workers);
 
       addLog(`  📡 CDN:${pathWins.CDN} 后端:${pathWins['后端']} 直连:${pathWins['直连']}`);
 
@@ -616,13 +635,14 @@ const handleP48StartClip = async (payload) => {
         await ffmpegMgr.ffmpeg.exec([...baseCmd, ...encArgs, outputName]);
       }
 
-      // Read output — 累积到数组，最后统一打包
+      // Read output and download immediately
       try {
         const data = await ffmpegMgr.ffmpeg.readFile(outputName);
-        completedClips.push({ name: safeName, data, ext: outExt });
+        downloadBlob(data, safeName + outExt);
         await ffmpegMgr.ffmpeg.deleteFile(outputName);
+        completedCount++;
       } catch (readErr) {
-        addLog(`❌ 读取输出文件失败: ${readErr.message}`);
+        addLog(`  ❌ 读取输出文件失败: ${readErr.message}`);
         failedClips.push({ name: safeName, error: readErr.message });
         await ffmpegMgr.ffmpeg.deleteFile('concat.ts');
         continue;
@@ -649,45 +669,12 @@ const handleP48StartClip = async (payload) => {
       addLog(`⚠️ ${failedClips.length} 个片段失败: ${failedClips.map(c => c.name).join(', ')}`);
     }
 
-    if (completedClips.length === 0) {
+    if (completedCount === 0) {
       addLog('❌ 没有成功处理的片段');
       ElMessage.error('所有片段处理失败');
     } else {
-      const totalBytes = completedClips.reduce((a, c) => a + c.data.byteLength, 0);
-      const totalMB = totalBytes / 1024 / 1024;
-      const ZIP_THRESHOLD = 900 * 1024 * 1024;
-
-      // 生成切片记录
-      let recordContent = `--- 批量裁剪记录 ---\n`;
-      recordContent += `源: 口袋48 ${payload.member} ${payload.broadcastTime}\n`;
-      recordContent += `M3U8: ${payload.m3u8Url}\n\n`;
-      payload.clips.forEach(c => {
-        recordContent += `名称: ${c.name}\n`;
-        recordContent += `开始: ${c.start}\n`;
-        recordContent += `结束: ${c.end}\n\n`;
-      });
-
-      addLog(`📦 ${completedClips.length} 个片段，总大小 ${totalMB.toFixed(1)} MB`);
-
-      if (totalBytes <= ZIP_THRESHOLD) {
-        addLog('📦 正在打包 zip...');
-        const zip = new JSZip();
-        for (const clip of completedClips) {
-          zip.file(`${clip.name}${clip.ext}`, clip.data);
-        }
-        zip.file('_clip_record.txt', recordContent);
-        const zipBlob = await zip.generateAsync({ type: 'blob' });
-        downloadBlob(zipBlob, `clips_${payload.member}_${new Date().toISOString().slice(0,10)}.zip`);
-        addLog(`✅ zip 打包完成 (${(zipBlob.size / 1024 / 1024).toFixed(1)} MB)`);
-      } else {
-        addLog(`⚠️ 总大小 ${totalMB.toFixed(1)} MB 超过 500MB 阈值，改为逐个下载`);
-        for (const clip of completedClips) {
-          downloadBlob(clip.data, `${clip.name}${clip.ext}`);
-        }
-        downloadBlob(new Blob([recordContent], { type: 'text/plain;charset=utf-8' }), `_clip_record_${payload.member}_${new Date().toISOString().slice(0,10)}.txt`);
-      }
-
-      const summary = `🎉 完成！成功 ${completedClips.length}/${payload.clips.length}`;
+      downloadBlob(new Blob([recordContent], { type: 'text/plain;charset=utf-8' }), `_clip_record_${payload.member}_${new Date().toISOString().slice(0,10)}.txt`);
+      const summary = `🎉 完成！成功 ${completedCount}/${payload.clips.length}`;
       addLog(summary);
       ElMessage.success(summary);
     }

@@ -169,6 +169,11 @@
           </el-radio-group>
         </div>
         <div class="setting-item">
+          <span class="label">并发:</span>
+          <el-input-number v-model="concurrency" :min="10" :max="30" :step="5" size="large" style="width: 120px" />
+          <span class="tip" style="font-size: 12px; color: #909399">同时下载分片数</span>
+        </div>
+        <div class="setting-item">
           <span class="label">格式:</span>
           <el-select v-model="targetFormat" style="width: 120px" size="large">
             <el-option v-if="outputCategory === 'video'" label="TS (默认)" value="ts" />
@@ -451,6 +456,7 @@ const clearList = () => clipList.value = []
 // --- Settings ---
 const outputCategory = ref('video')
 const targetFormat = ref('ts')
+const concurrency = ref(15)
 
 watch(outputCategory, (cat) => {
   targetFormat.value = cat === 'video' ? 'ts' : 'm4a'
@@ -465,6 +471,7 @@ const startClip = () => {
     broadcastTime: formatReplayTime(selectedReplay.value.ctime).replace(/[-: ]/g, (c) => c === ' ' ? '~' : c === ':' ? '.' : '-'),
     clips: clipList.value.map(c => ({ ...c })),
     format: targetFormat.value,
+    concurrency: concurrency.value,
   })
 }
 </script>
