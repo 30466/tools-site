@@ -7,7 +7,7 @@
 - `/` 首页 — 分类卡片展示（推荐网站 / APP 下载 / 剪辑工具 / 应援站 / 联系我），导航栏首页下拉可直达各板块
 - `/download` abm48 APP 下载中心（含管理员上传）
 - `/member-archive` 成员档案 APP 下载（含管理员上传）
-- `/clip` 导入切片本批量剪切（FFmpeg WASM，三路并行竞速下载 TS 分片，失败自动跳过，打包 ZIP 下载）
+- `/clip` 导入切片本批量剪切（FFmpeg WASM，滑动窗口并发下载 TS 分片，重试容错，切完即下）
 - `/transcode` 批量转码（支持音频提取、格式转换、极速模式）
 - `/merge` 媒体合并（支持无损极速合并、拖拽排序、内存超限保护）
 
@@ -36,7 +36,6 @@
 - Vite
 - Element Plus（zh-CN）
 - `@ffmpeg/ffmpeg` + `@ffmpeg/core` + `@ffmpeg/util`
-- JSZip（批量输出 ZIP）
 - SortableJS（拖拽排序）
 - **Node.js 后端**：Express + CORS + Multer（APK 上传、API 代理、TS 分片代理）
 
@@ -108,6 +107,36 @@ GET /proxy/segment?url=<encoded_url>
 ```
 
 浏览器 fetch 在 `Content-Length` 与实际数据不匹配时会 abort。Node 端使用原生 `http` 模块抓取（不校验 `Content-Length`），流式转发（chunked encoding），即使上游截断浏览器也能收到已转发数据。
+
+### TS 分片下载策略
+
+剪辑工具对口袋48直播录播的 TS 分片下载采用**多级容错**策略：
+
+#### 路由层（三路降级）
+
+```
+第1次尝试：只直连（避免三路并发拥塞）
+第2次尝试：只直连（瞬时拥塞已解除，通常秒成功）
+第3次尝试：CDN代理 + 后端代理 + 直连 三路竞速
+第4次尝试：三路竞速（超时 8s）
+第5次尝试：三路竞速（超时 10s）
+```
+
+- **直连**：浏览器直接 fetch idol-vod.48.cn，占 95%+ 成功量
+- **CDN 代理**：经 nginx `/cdn/` → idol-vod，绕过部分网络限制
+- **后端代理**：经 Node `/proxy/segment` → idol-vod，Node 端不校验 Content-Length，截断也能返回
+
+前端 `Promise.any` 竞速，最快返回即采用。前两次只走直连能减少 67% 无效请求，降低自我拥塞。
+
+#### 并发层（滑动窗口）
+
+分片下载采用**滑动窗口并发池**（非批次模式），始终保持 N 个分片同时下载，完成一个立即补充下一个，避免批次等待慢分片拖累整体进度。
+
+并发数可通过面板 UI 调节（10-30，步长 5，默认 15）。
+
+#### 输出层（切完即下）
+
+每个片段剪切完成后立即触发浏览器下载，不再累积到内存中统一打包。内存峰值仅占单个片段大小（~100MB），不受总片段数限制。
 
 ### API 代理
 
@@ -208,8 +237,10 @@ API 封装位于 `src/api/pocket48.js`，面板组件位于 `src/components/Pock
   - 检查线上是否设置了 COOP/COEP 响应头
   - 确保 COEP 使用 `credentialless` 而非 `require-corp`（新版兼容性更好）
 - TS 分片下载失败
+  - 系统会自动重试最多 5 次，前两次直连、后三次三路竞速（CDN/后端/直连）
   - 检查 Node 后端是否运行，`/proxy/segment` 是否可达
-  - 浏览器控制台查看是否有网络错误
+  - 检查 nginx `/cdn/` 代理是否正常转发
+  - 可通过面板调节并发数（降低可减少网络拥塞，提高可加速下载）
 - FFmpeg 加载失败
   - 检查三个 CDN 源是否可访问
   - 自有服务器的 `/ffmpeg/ffmpeg-core.js` 和 `.wasm` 文件需正确部署
