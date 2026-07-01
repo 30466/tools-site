@@ -147,10 +147,9 @@ const yearList = computed(() => {
   return years
 })
 const monthList = computed(() => {
-  const nowMonth = new Date().getMonth() + 1
   let start = 1, end = 12
   if (selectedYear.value === earliestYear.value) start = earliestMonth.value
-  if (selectedYear.value === currentYearNum) end = nowMonth
+  if (selectedYear.value === latestYear.value) end = latestMonth.value
   const months = []
   for (let m = start; m <= end; m++) months.push(m)
   return months
@@ -193,8 +192,8 @@ function prevMonth() {
 }
 
 function nextMonth() {
-  if (selectedYear.value === currentYearNum && selectedMonth.value >= new Date().getMonth() + 1) {
-    ElMessage.warning('该月目前还未至')
+  if (selectedYear.value === latestYear.value && selectedMonth.value >= latestMonth.value) {
+    ElMessage.warning('暂无更新的录播')
     return
   }
   if (selectedMonth.value === 12) { selectedMonth.value = 1; selectedYear.value++ }
@@ -204,6 +203,10 @@ function nextMonth() {
 
 async function goLatest() {
   await loadAll()
+  if (selectedYear.value === latestYear.value && selectedMonth.value === latestMonth.value) {
+    ElMessage.warning('已是最新的录播记录月')
+    return
+  }
   selectedYear.value = latestYear.value
   selectedMonth.value = latestMonth.value
   onYearMonthChange()
@@ -211,6 +214,10 @@ async function goLatest() {
 
 async function goOldest() {
   await loadAll()
+  if (selectedYear.value === earliestYear.value && selectedMonth.value === earliestMonth.value) {
+    ElMessage.warning('已是最久远的录播记录月')
+    return
+  }
   selectedYear.value = earliestYear.value
   selectedMonth.value = earliestMonth.value
   onYearMonthChange()

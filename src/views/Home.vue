@@ -246,6 +246,16 @@
           </div>
         </div>
       </el-card>
+
+      <el-card class="tool-card" shadow="hover" @click="openExternal('https://xzzy.abm48.com/')">
+        <div class="card-content">
+          <div class="icon-box">🎤</div>
+          <div class="info">
+            <h3>🎤 CGT48 徐郑子滢</h3>
+            <p>徐郑子滢应援站，唱歌记录网站。</p>
+          </div>
+        </div>
+      </el-card>
     </div>
 
     <!-- 联系我 -->
