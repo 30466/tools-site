@@ -4,9 +4,10 @@
 
 ## 功能页面
 
-- `/` 首页 — 分类卡片展示（推荐网站 / APP 下载 / 剪辑工具 / 应援站 / 联系我），导航栏首页下拉可直达各板块
+- `/` 首页 — 分类卡片展示（推荐网站 / APP 下载 / 剪辑工具 / Skills / 应援站 / 联系我），导航栏首页下拉可直达各板块
 - `/download` abm48 APP 下载中心（含管理员上传）
 - `/member-archive` 成员档案 APP 下载（含管理员上传）
+- `/pocket48-replay` 口袋48录播回放在线播放、查询、批量剪切、弹幕互动（独立子页）
 - `/clip` 导入切片本批量剪切（FFmpeg WASM，滑动窗口并发下载 TS 分片，重试容错，切完即下）
 - `/transcode` 批量转码（支持音频提取、格式转换、极速模式）
 - `/merge` 媒体合并（支持无损极速合并、拖拽排序、内存超限保护）
@@ -14,29 +15,40 @@
 **首页外部链接卡片：**
 
 - [小偶像音乐网站](https://abm48.com/) - 收录在团、退团、毕业成员的歌曲
+- [口袋48录播回放在线播放 查询 剪切](/pocket48-replay) - 在线播放、查询、批量剪切口袋48成员直播回放（内置子页）
 - [成员档案](https://snh48wiki.top/) - 塞纳河成员档案查询
 - [口袋48历史记录查询](https://msg48.org/) - 查询口袋48房间消息、直播电台回放、ID查成分、翻牌字数
 - [河曲应援Call本查询站](https://glx48call.dpdns.org/) - 支持歌词搜索，查询河曲应援Call本
 - [48tools](https://github.com/duan602728596/48tools/releases) - 口袋48 PC版，直播录源、录播下载、B站/抖音视频抓取等
-- [字幕/弹幕唱歌检测](https://sd.abm48.com/) - 根据字幕或弹幕文件判断并检测唱歌时间段
 
 **应援站：**
 
 - [CGT48 谭思慧](https://tsh.abm48.com)
 - [BEJ48 吴睿莎](https://wrs.abm48.com)
-- [GNZ48 徐郑子滢](https://xzzy.abm48.com)
+- [CGT48 徐郑子滢](https://xzzy.abm48.com)
 
-**桌面版下载：**
+## Skills
 
-剪辑工具子页面（Clip / Transcode / Merge）卡片头部提供 [VideoEditingToolkit-Lite.zip](/VideoEditingToolkit-Lite.zip) 桌面版下载入口。
+终端 AI Agent skill（如 OpenCode/
+Claude Code/Codex 等），纯语言交互，无需打开网页即可完成以下操作：
+
+- [口袋48录播下载](https://gitee.com/albert-chen04/pocket48-replays-skills) — 口袋48录播回放相关下载与查询
+- [批量剪切](https://gitee.com/albert-chen04/media-batch-clip-skills) — 批量剪切（包括口袋48录播批量剪切，无需下载录播文件）
+- [弹幕唱歌检测](https://gitee.com/albert-chen04/pocket48-danmaku-analysis-skills) — 口袋48弹幕文件检测唱歌片段（脚本筛选固定词与纯大语言模型交叉检验）
+- [弹幕唱歌检测](https://gitee.com/albert-chen04/pocket48-danmaku-analysis-skills) — 口袋48弹幕文件检测唱歌片段（脚本筛选固定词与纯大语言模型交叉检验）
+- [音乐批量上传](https://gitee.com/albert-chen04/albert-music-upload-skills) — 批量上传音频到[小偶像音乐网站](https://abm48.com)
+- [切片本上传](https://gitee.com/albert-chen04/clip-record-upload-skills) — 批量上传唱歌切片本到[切片本网站(应援站)等](https://tsh.abm48.com)
 
 ## 技术栈
 
 - Vue 3 + Vue Router 4
-- Vite
+- Vite（^7.x）
 - Element Plus（zh-CN）
 - `@ffmpeg/ffmpeg` + `@ffmpeg/core` + `@ffmpeg/util`
+- ArtPlayer + HLS.js + artplayer-plugin-danmuku（口袋48录播播放器）
+- JSZip（打包下载）
 - SortableJS（拖拽排序）
+- Sass（样式预处理）
 - **Node.js 后端**：Express + CORS + Multer（APK 上传、API 代理、TS 分片代理）
 
 ## 本地开发
@@ -55,7 +67,7 @@ npm run build
 npm run preview
 ```
 
-### Node.js 后端（可选，剪辑工具 TS 分片代理需要）
+### Node.js 后端（可选，剪辑工具 TS 分片代理可选可不选，建议不选）
 
 ```bash
 cd server
@@ -100,7 +112,7 @@ FFmpeg 加载顺序（三级 CDN 降级，由 `src/composables/useFFmpeg.js` 的
 
 ## Node.js 后端代理
 
-### TS 分片代理
+### TS 分片代理（其实没啥用，三路竞速时直连胜率高达 90% 以上，即可以只需要一条路即可）
 
 ```
 GET /proxy/segment?url=<encoded_url>
@@ -148,13 +160,17 @@ GET /proxy/segment?url=<encoded_url>
 
 ### 口袋48 直播录播
 
-`/` 首页及剪辑工具页面内嵌半透明直播面板，支持：
+独立子页 `/pocket48-replay`，提供完整的口袋48录播回放体验：
 
-- 按分组浏览成员直播/录播列表
-- 解析 M3U8 获取 TS 分片地址
-- 通过后端代理下载 TS 分片进行剪辑
+- 动态成员搜索（el-autocomplete，从 48 API 实时获取成员映射）
+- 日历浏览：按年月归档，默认跳到最新录播月份，支持最早/最新快捷导航
+- ArtPlayer + HLS.js 播放器，支持弹幕播放（artplayer-plugin-danmuku）
+- 3 路竞速批量剪切（CDN 代理 / 后端代理 / 直连），复用剪辑工具的滑动窗口并发池
+- 弹幕时间线与录播信息面板
 
-API 封装位于 `src/api/pocket48.js`，面板组件位于 `src/components/Pocket48Panel.vue`。
+相关组件位于 `src/components/P48*.vue`，数据层封装在 `src/composables/useP48ReplayData.js`。
+
+API 封装位于 `src/api/pocket48.js`。
 
 ## APK 下载/上传机制
 
@@ -192,13 +208,12 @@ API 封装位于 `src/api/pocket48.js`，面板组件位于 `src/components/Pock
 │   ├── style.css
 │   ├── router/index.js
 │   ├── api/pocket48.js
-│   ├── components/          # VideoToolsNav, Pocket48Panel
-│   ├── composables/         # useFFmpeg.js
-│   └── views/               # Home / Download / MemberArchive / Clip / Transcode / Merge
+│   ├── components/          # VideoToolsNav, P48ReplayCalendar, P48ReplayPlayer, P48ReplayInfo, P48DanmakuTimeline, P48ClipPanel
+│   ├── composables/         # useFFmpeg.js, useP48ReplayData.js
+│   └── views/               # Home / Download / MemberArchive / Clip / Transcode / Merge / Pocket48Replay
 ├── public/
 │   ├── ffmpeg/              # 部署时复制到根目录
-│   ├── apks/                # 部署时复制到根目录
-│   └── VideoEditingToolkit-Lite.zip
+│   └── apks/                # 部署时复制到根目录
 ├── server/                  # Node 后端（部署时复制到根目录）
 │   ├── index.js
 │   ├── config.js
@@ -210,37 +225,4 @@ API 封装位于 `src/api/pocket48.js`，面板组件位于 `src/components/Pock
 └── dist/                    # build 产物，部署到服务器根目录
 ```
 
-### 生产部署（`tools.abm48.com` 根目录）
 
-```text
-.
-├── assets/                  # Vite 构建产物（JS/CSS）
-├── server/                  # Node.js 后端
-│   ├── index.js
-│   ├── config.js
-│   ├── package.json
-│   └── uploads/
-├── apks/
-│   ├── abm48/
-│   ├── member_archive/
-│   └── .htaccess
-├── ffmpeg/
-│   ├── ffmpeg-core.js
-│   └── ffmpeg-core.wasm
-├── index.html
-└── VideoEditingToolkit-Lite.zip
-```
-
-## 常见问题
-
-- 打开 `/clip` 提示"跨域隔离未生效 / SharedArrayBuffer 不可用"
-  - 检查线上是否设置了 COOP/COEP 响应头
-  - 确保 COEP 使用 `credentialless` 而非 `require-corp`（新版兼容性更好）
-- TS 分片下载失败
-  - 系统会自动重试最多 5 次，前两次直连、后三次三路竞速（CDN/后端/直连）
-  - 检查 Node 后端是否运行，`/proxy/segment` 是否可达
-  - 检查 nginx `/cdn/` 代理是否正常转发
-  - 可通过面板调节并发数（降低可减少网络拥塞，提高可加速下载）
-- FFmpeg 加载失败
-  - 检查三个 CDN 源是否可访问
-  - 自有服务器的 `/ffmpeg/ffmpeg-core.js` 和 `.wasm` 文件需正确部署
