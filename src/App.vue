@@ -1,6 +1,6 @@
 <template>
   <el-config-provider :locale="zhCn">
-    <div class="app-wrapper" :style="{ backgroundImage: `url(${bgImage})` }">
+    <div class="app-wrapper" :class="{ 'is-player-mode': isPlayerMode }" :style="{ backgroundImage: `url(${bgImage})` }">
       
       <nav class="nav-bar">
         <div class="nav-content">
@@ -57,7 +57,7 @@
         </div>
       </nav>
 
-      <div class="main-container">
+      <div class="main-container" :class="{ 'is-replay': isReplayRoute }">
         <router-view v-slot="{ Component }">
           <transition name="fade" mode="out-in">
             <component :is="Component" />
@@ -81,6 +81,9 @@ import bgImage from './assets/bg.jpg'
 
 const route = useRoute()
 const router = useRouter()
+
+const isReplayRoute = computed(() => route.path === '/pocket48-replay')
+const isPlayerMode = computed(() => route.path === '/pocket48-replay' && !!route.query.live)
 
 const scrollToSection = (id) => {
   if (route.path !== '/') {
@@ -177,6 +180,17 @@ body {
   flex: 1;
   width: 100%;
   box-sizing: border-box;
+}
+
+/* 口袋48录播回放页：去掉宽度限制 */
+.main-container.is-replay {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+@media (max-width: 768px) {
+  .is-player-mode .nav-bar { display: none; }
 }
 
 /* 简单的页面切换动画 */

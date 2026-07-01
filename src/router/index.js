@@ -39,6 +39,12 @@ const router = createRouter({
       component: () => import('../views/MemberArchive.vue'),
       meta: { title: '成员档案 APP' }
     },
+    {
+      path: '/pocket48-replay',
+      name: 'pocket48-replay',
+      component: () => import('../views/Pocket48Replay.vue'),
+      meta: { title: '口袋48录播回放' }
+    },
   ]
 })
 

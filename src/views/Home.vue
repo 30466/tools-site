@@ -13,7 +13,17 @@
           <div class="icon-box">🎵</div>
           <div class="info">
             <h3>小偶像音乐网站</h3>
-            <p>写给小偶像的音乐网站，收录在团、退团、毕业成员的歌曲。</p>
+            <p>ABM48 写给小偶像的音乐网站，收录在团、退团、毕业成员的歌曲。</p>
+          </div>
+        </div>
+      </el-card>
+
+      <el-card class="tool-card" shadow="hover" @click="$router.push('/pocket48-replay')">
+        <div class="card-content">
+          <div class="icon-box">📺</div>
+          <div class="info">
+            <h3>口袋48录播回放在线播放 查询 剪切</h3>
+            <p>ABM48 在线播放、查询、批量剪切口袋48成员直播回放。</p>
           </div>
         </div>
       </el-card>
@@ -33,7 +43,7 @@
           <div class="icon-box">💬</div>
           <div class="info">
             <h3>口袋48历史记录查询</h3>
-            <p>查询口袋48房间消息、直播电台回放、口袋48 ID查成分、翻牌字数。</p>
+            <p>MSG48 查询口袋48房间消息、直播电台回放、口袋48 ID查成分、翻牌字数。</p>
           </div>
         </div>
       </el-card>
@@ -43,7 +53,7 @@
           <div class="icon-box">🎵</div>
           <div class="info">
             <h3>河曲应援Call本查询站</h3>
-            <p>支持歌词搜索，查询河曲应援Call本。</p>
+            <p>GLX48 支持歌词搜索，查询河曲应援Call本。</p>
           </div>
         </div>
       </el-card>
@@ -86,7 +96,7 @@
         <div class="card-content">
           <div class="icon-box">🎵</div>
           <div class="info">
-            <h3>abm48 APP 下载</h3>
+            <h3>ABM48 APP 下载</h3>
             <p>写给小偶像的音乐APP，包括在团，退团，毕业等。</p>
           </div>
         </div>

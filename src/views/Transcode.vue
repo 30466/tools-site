@@ -10,20 +10,7 @@
             <el-tag type="warning" effect="plain" round size="small" style="margin-left: 10px">Beta</el-tag>
           </div>
     
-          <div class="header-right">
-            <a href="/VideoEditingToolkit-Lite.zip" class="project-link">
-              <el-button type="primary" link>
-                <el-icon style="margin-right: 4px"><Download /></el-icon>
-                桌面版下载
-              </el-button>
-            </a>
-            <a href="https://gitee.com/albert-chen04/video-editing-toolkit" target="_blank" class="project-link">
-              <el-button type="primary" link>
-                <el-icon style="margin-right: 4px"><Link /></el-icon>
-                剪辑软件项目地址
-              </el-button>
-            </a>
-          </div>
+          <div class="header-right"></div>
         </div>
       </template>
 
@@ -172,7 +159,7 @@ import { ref, computed, onMounted, nextTick, watch, watchEffect } from 'vue';
 import { fetchFile } from '@ffmpeg/util';
 import JSZip from 'jszip';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { FolderAdd, Delete, Refresh, Link, Download } from '@element-plus/icons-vue';
+import { FolderAdd, Delete, Refresh } from '@element-plus/icons-vue';
 import VideoToolsNav from '@/components/VideoToolsNav.vue';
 import { FFmpegManager } from '@/composables/useFFmpeg';
 
