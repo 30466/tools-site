@@ -19,6 +19,7 @@
                   <el-dropdown-item @click="scrollToSection('section-websites')">📌 推荐网站</el-dropdown-item>
                   <el-dropdown-item @click="scrollToSection('section-apps')">📌 APP 下载</el-dropdown-item>
                   <el-dropdown-item @click="scrollToSection('section-tools')">📌 剪辑工具</el-dropdown-item>
+                  <el-dropdown-item @click="scrollToSection('section-skills')">📌 Skills</el-dropdown-item>
                   <el-dropdown-item @click="scrollToSection('section-support')">📌 应援站</el-dropdown-item>
                   <el-dropdown-item @click="scrollToSection('section-contact')">💬 联系我</el-dropdown-item>
                 </el-dropdown-menu>

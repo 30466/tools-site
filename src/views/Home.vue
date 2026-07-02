@@ -170,54 +170,59 @@
 
     <!-- Skills -->
     <h2 class="section-title" id="section-skills">📌 Skills</h2>
-    <p class="section-hint">终端 AI Agent skill，纯语言解决以下问题：</p>
+    <p class="section-hint">终端 AI Agent skill，点击下方按钮复制安装命令到剪贴板，用AI纯语言解决以下问题：</p>
     <div class="tools-grid">
-      <el-card class="tool-card" shadow="hover" @click="openExternal('https://gitee.com/albert-chen04/pocket48-replays-skills')">
+      <el-card class="tool-card" shadow="hover" @click="openExternal('https://github.com/30466/pocket48-replays-skills')">
         <div class="card-content">
           <div class="icon-box">💾</div>
           <div class="info">
             <h3>口袋48录播下载</h3>
             <p>口袋48录播回放相关下载与查询</p>
+            <el-button size="small" type="primary" plain @click.stop="copyCmd('npx skills add 30466/pocket48-replays-skills')">复制安装命令</el-button>
           </div>
         </div>
       </el-card>
 
-      <el-card class="tool-card" shadow="hover" @click="openExternal('https://gitee.com/albert-chen04/media-batch-clip-skills')">
+      <el-card class="tool-card" shadow="hover" @click="openExternal('https://github.com/30466/media-batch-clip-skills')">
         <div class="card-content">
           <div class="icon-box">✂️</div>
           <div class="info">
             <h3>批量剪切</h3>
             <p>批量剪切（包括口袋48录播批量剪切，无需下载录播文件）</p>
+            <el-button size="small" type="primary" plain @click.stop="copyCmd('npx skills add 30466/media-batch-clip-skills')">复制安装命令</el-button>
           </div>
         </div>
       </el-card>
 
-      <el-card class="tool-card" shadow="hover" @click="openExternal('https://gitee.com/albert-chen04/pocket48-danmaku-analysis-skills')">
+      <el-card class="tool-card" shadow="hover" @click="openExternal('https://github.com/30466/pocket48-danmaku-analysis-skills')">
         <div class="card-content">
           <div class="icon-box">🎤</div>
           <div class="info">
             <h3>弹幕唱歌检测</h3>
             <p>口袋48弹幕文件检测唱歌片段</p>
+            <el-button size="small" type="primary" plain @click.stop="copyCmd('npx skills add 30466/pocket48-danmaku-analysis-skills')">复制安装命令</el-button>
           </div>
         </div>
       </el-card>
 
-      <el-card class="tool-card" shadow="hover" @click="openExternal('https://gitee.com/albert-chen04/albert-music-upload-skills')">
+      <el-card class="tool-card" shadow="hover" @click="openExternal('https://github.com/30466/albert-music-upload-skills')">
         <div class="card-content">
           <div class="icon-box">🎵</div>
           <div class="info">
             <h3>音乐批量上传</h3>
             <p>批量上传音频到小偶像音乐网站</p>
+            <el-button size="small" type="primary" plain @click.stop="copyCmd('npx skills add 30466/albert-music-upload-skills')">复制安装命令</el-button>
           </div>
         </div>
       </el-card>
 
-      <el-card class="tool-card" shadow="hover" @click="openExternal('https://gitee.com/albert-chen04/clip-record-upload-skills')">
+      <el-card class="tool-card" shadow="hover" @click="openExternal('https://github.com/30466/clip-record-upload-skills')">
         <div class="card-content">
           <div class="icon-box">📋</div>
           <div class="info">
             <h3>切片本上传</h3>
             <p>批量上传唱歌切片本到切片本网站</p>
+            <el-button size="small" type="primary" plain @click.stop="copyCmd('npx skills add 30466/clip-record-upload-skills')">复制安装命令</el-button>
           </div>
         </div>
       </el-card>
@@ -300,6 +305,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import wechatImg from '../assets/wechat.png'
 import qqImg from '../assets/qq.png'
 
@@ -331,6 +337,11 @@ const showQrCode = (type) => {
   qrType.value = type
   qrVisible.value = true
 }
+
+const copyCmd = (cmd) => {
+  navigator.clipboard.writeText(cmd)
+  ElMessage.success('已复制安装命令')
+}
 </script>
 
 <style scoped>
@@ -343,6 +354,7 @@ const showQrCode = (type) => {
   margin: 30px 0 15px 0;
   color: #303133;
   font-size: 1.3rem;
+  scroll-margin-top: 80px;
 }
 
 .section-hint {

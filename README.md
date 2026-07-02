@@ -29,15 +29,15 @@
 
 ## Skills
 
-终端 AI Agent skill（如 OpenCode/
-Claude Code/Codex 等），纯语言交互，无需打开网页即可完成以下操作：
+终端 AI Agent skill，安装命令：`npx skills add 30466/<仓库名>`，用AI纯语言解决以下问题：
 
-- [口袋48录播下载](https://gitee.com/albert-chen04/pocket48-replays-skills) — 口袋48录播回放相关下载与查询
-- [批量剪切](https://gitee.com/albert-chen04/media-batch-clip-skills) — 批量剪切（包括口袋48录播批量剪切，无需下载录播文件）
-- [弹幕唱歌检测](https://gitee.com/albert-chen04/pocket48-danmaku-analysis-skills) — 口袋48弹幕文件检测唱歌片段（脚本筛选固定词与纯大语言模型交叉检验）
-- [弹幕唱歌检测](https://gitee.com/albert-chen04/pocket48-danmaku-analysis-skills) — 口袋48弹幕文件检测唱歌片段（脚本筛选固定词与纯大语言模型交叉检验）
-- [音乐批量上传](https://gitee.com/albert-chen04/albert-music-upload-skills) — 批量上传音频到[小偶像音乐网站](https://abm48.com)
-- [切片本上传](https://gitee.com/albert-chen04/clip-record-upload-skills) — 批量上传唱歌切片本到[切片本网站(应援站)等](https://tsh.abm48.com)
+| Skill | 安装命令 |
+|-------|---------|
+| [口袋48录播下载](https://github.com/30466/pocket48-replays-skills) — 查询下载口袋48录播回放 | `npx skills add 30466/pocket48-replays-skills` |
+| [批量剪切](https://github.com/30466/media-batch-clip-skills) — 批量剪切音视频（支持口袋48录播在线剪切） | `npx skills add 30466/media-batch-clip-skills` |
+| [弹幕唱歌检测](https://github.com/30466/pocket48-danmaku-analysis-skills) — 分析弹幕文件识别唱歌片段（脚本+大模型交叉验证） | `npx skills add 30466/pocket48-danmaku-analysis-skills` |
+| [音乐批量上传](https://github.com/30466/albert-music-upload-skills) — 批量上传音频到[小偶像音乐网站](https://abm48.com) | `npx skills add 30466/albert-music-upload-skills` |
+| [切片本上传](https://github.com/30466/clip-record-upload-skills) — 批量上传切片本到[应援站](https://tsh.abm48.com) | `npx skills add 30466/clip-record-upload-skills` |
 
 ## 技术栈
 
