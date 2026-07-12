@@ -221,7 +221,7 @@ const downloadApk = (url) => {
   }
   
   // 2. 后台请求计数
-  fetch('/apks/abm48/count.php', { method: 'POST' }).catch(err => console.error(err))
+  fetch('/apks/abm48/count').catch(err => console.error(err))
   
   // 3. 开始下载
   window.open(url, '_blank')
@@ -254,7 +254,7 @@ const submitUpload = async () => {
 
   uploading.value = true
   try {
-    const response = await fetch('/apks/abm48/upload.php', {
+    const response = await fetch('/apks/abm48/upload', {
       method: 'POST',
       body: formData
     })

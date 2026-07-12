@@ -125,47 +125,55 @@ app.use('/source48', createProxy(config.upstream.source48))
 const upload = multer({ dest: path.join(__dirname, 'uploads') })
 
 // ABM48 APK 上传
-app.post('/apks/abm48/upload', upload.single('file'), (req, res) => {
-  const password = req.body.password || ''
-  if (password !== config.abm48_password) {
-    return res.status(403).json({ error: '密码错误' })
+app.post('/apks/abm48/upload', upload.single('file'), async (req, res) => {
+  try {
+    const password = req.body.password || ''
+    if (password !== config.abm48_password) {
+      return res.status(403).json({ error: '密码错误' })
+    }
+    if (!req.file) {
+      return res.status(400).json({ error: '文件上传失败' })
+    }
+
+    const versionName = req.body.version || 'unknown'
+    const notes = req.body.notes || ''
+    const uploadDir = path.join(__dirname, '../apks/abm48')
+    const fileName = Buffer.from(req.file.originalname, 'latin1').toString('utf8')
+    const targetFile = path.join(uploadDir, fileName)
+
+    fs.mkdirSync(uploadDir, { recursive: true })
+    fs.renameSync(req.file.path, targetFile)
+
+    // 更新 version.json
+    const jsonFile = path.join(uploadDir, 'version.json')
+    let currentData = []
+    if (fs.existsSync(jsonFile)) {
+      try { currentData = JSON.parse(fs.readFileSync(jsonFile, 'utf-8')) } catch {}
+    }
+
+    const newEntry = {
+      name: versionName,
+      filename: fileName,
+      url: '/apks/abm48/' + fileName,
+      date: new Date().toISOString().slice(0, 10),
+      notes: notes.split(/[;；]/).map(s => s.trim()).filter(Boolean)
+    }
+    currentData.unshift(newEntry)
+    fs.writeFileSync(jsonFile, JSON.stringify(currentData, null, 2))
+
+    res.json({ success: true, message: '上传成功' })
+  } catch (err) {
+    console.error('[upload] ABM48 上传失败:', err)
+    if (req.file && req.file.path) {
+      fs.unlink(req.file.path, () => {})
+    }
+    res.status(500).json({ error: '服务器内部错误: ' + err.message })
   }
-  if (!req.file) {
-    return res.status(400).json({ error: '文件上传失败' })
-  }
-
-  const versionName = req.body.version || 'unknown'
-  const notes = req.body.notes || ''
-  const uploadDir = path.join(__dirname, 'public/apks/abm48')
-  const fileName = req.file.originalname
-  const targetFile = path.join(uploadDir, fileName)
-
-  fs.mkdirSync(uploadDir, { recursive: true })
-  fs.renameSync(req.file.path, targetFile)
-
-  // 更新 version.json
-  const jsonFile = path.join(uploadDir, 'version.json')
-  let currentData = []
-  if (fs.existsSync(jsonFile)) {
-    try { currentData = JSON.parse(fs.readFileSync(jsonFile, 'utf-8')) } catch {}
-  }
-
-  const newEntry = {
-    name: versionName,
-    filename: fileName,
-    url: '/apks/abm48/' + fileName,
-    date: new Date().toISOString().slice(0, 10),
-    notes: notes.split(/[;；]/).map(s => s.trim()).filter(Boolean)
-  }
-  currentData.unshift(newEntry)
-  fs.writeFileSync(jsonFile, JSON.stringify(currentData, null, 2))
-
-  res.json({ success: true, message: '上传成功' })
 })
 
 // ABM48 下载计数
 app.get('/apks/abm48/count', (req, res) => {
-  const statsFile = path.join(__dirname, 'public/apks/abm48', 'stats.json')
+  const statsFile = path.join(__dirname, '../apks/abm48', 'stats.json')
   let stats = { total_downloads: 0 }
   if (fs.existsSync(statsFile)) {
     try { stats = JSON.parse(fs.readFileSync(statsFile, 'utf-8')) } catch {}
@@ -177,46 +185,54 @@ app.get('/apks/abm48/count', (req, res) => {
 })
 
 // Member Archive APK 上传
-app.post('/apks/member_archive/upload', upload.single('file'), (req, res) => {
-  const password = req.body.password || ''
-  if (password !== config.member_archive_password) {
-    return res.status(403).json({ error: '密码错误' })
+app.post('/apks/member_archive/upload', upload.single('file'), async (req, res) => {
+  try {
+    const password = req.body.password || ''
+    if (password !== config.member_archive_password) {
+      return res.status(403).json({ error: '密码错误' })
+    }
+    if (!req.file) {
+      return res.status(400).json({ error: '文件上传失败' })
+    }
+
+    const versionName = req.body.version || 'unknown'
+    const notes = req.body.notes || ''
+    const uploadDir = path.join(__dirname, '../apks/member_archive')
+    const fileName = Buffer.from(req.file.originalname, 'latin1').toString('utf8')
+    const targetFile = path.join(uploadDir, fileName)
+
+    fs.mkdirSync(uploadDir, { recursive: true })
+    fs.renameSync(req.file.path, targetFile)
+
+    const jsonFile = path.join(uploadDir, 'version.json')
+    let currentData = []
+    if (fs.existsSync(jsonFile)) {
+      try { currentData = JSON.parse(fs.readFileSync(jsonFile, 'utf-8')) } catch {}
+    }
+
+    const newEntry = {
+      name: versionName,
+      filename: fileName,
+      url: '/apks/member_archive/' + fileName,
+      date: new Date().toISOString().slice(0, 10),
+      notes: notes.split(/[;；]/).map(s => s.trim()).filter(Boolean)
+    }
+    currentData.unshift(newEntry)
+    fs.writeFileSync(jsonFile, JSON.stringify(currentData, null, 2))
+
+    res.json({ success: true, message: '上传成功' })
+  } catch (err) {
+    console.error('[upload] Member Archive 上传失败:', err)
+    if (req.file && req.file.path) {
+      fs.unlink(req.file.path, () => {})
+    }
+    res.status(500).json({ error: '服务器内部错误: ' + err.message })
   }
-  if (!req.file) {
-    return res.status(400).json({ error: '文件上传失败' })
-  }
-
-  const versionName = req.body.version || 'unknown'
-  const notes = req.body.notes || ''
-  const uploadDir = path.join(__dirname, 'public/apks/member_archive')
-  const fileName = req.file.originalname
-  const targetFile = path.join(uploadDir, fileName)
-
-  fs.mkdirSync(uploadDir, { recursive: true })
-  fs.renameSync(req.file.path, targetFile)
-
-  const jsonFile = path.join(uploadDir, 'version.json')
-  let currentData = []
-  if (fs.existsSync(jsonFile)) {
-    try { currentData = JSON.parse(fs.readFileSync(jsonFile, 'utf-8')) } catch {}
-  }
-
-  const newEntry = {
-    name: versionName,
-    filename: fileName,
-    url: '/apks/member_archive/' + fileName,
-    date: new Date().toISOString().slice(0, 10),
-    notes: notes.split(/[;；]/).map(s => s.trim()).filter(Boolean)
-  }
-  currentData.unshift(newEntry)
-  fs.writeFileSync(jsonFile, JSON.stringify(currentData, null, 2))
-
-  res.json({ success: true, message: '上传成功' })
 })
 
 // Member Archive 下载计数
 app.get('/apks/member_archive/count', (req, res) => {
-  const statsFile = path.join(__dirname, 'public/apks/member_archive', 'stats.json')
+  const statsFile = path.join(__dirname, '../apks/member_archive', 'stats.json')
   let stats = { total_downloads: 0 }
   if (fs.existsSync(statsFile)) {
     try { stats = JSON.parse(fs.readFileSync(statsFile, 'utf-8')) } catch {}
@@ -229,10 +245,10 @@ app.get('/apks/member_archive/count', (req, res) => {
 
 // ─── 静态文件 ──────────────────────────────────────────────────────────────
 // FFmpeg 核心文件
-app.use('/ffmpeg', express.static(path.join(__dirname, 'public/ffmpeg')))
+app.use('/ffmpeg', express.static(path.join(__dirname, '../ffmpeg')))
 
 // APK 文件
-app.use('/apks', express.static(path.join(__dirname, 'public/apks')))
+app.use('/apks', express.static(path.join(__dirname, '../apks')))
 
 // 生产环境：前端构建文件
 const staticDir = path.resolve(__dirname, config.staticDir)

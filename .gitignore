@@ -53,3 +53,7 @@ public/apks/member_archive/count.php
 public/apks/member_archive/upload.php
 public/apks/config.example.php
 public/apks/.htaccess
+
+# Local symlinks for Node backend path alignment
+apks
+ffmpeg

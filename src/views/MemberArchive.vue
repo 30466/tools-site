@@ -226,7 +226,7 @@ const downloadApk = (url) => {
   }
   
   // 2. 后台请求计数
-  fetch('/apks/member_archive/count.php', { method: 'POST' }).catch(err => console.error(err))
+  fetch('/apks/member_archive/count').catch(err => console.error(err))
 
   // 3. 开始下载
   window.open(url, '_blank')
@@ -259,7 +259,7 @@ const submitUpload = async () => {
 
   uploading.value = true
   try {
-    const response = await fetch('/apks/member_archive/upload.php', {
+    const response = await fetch('/apks/member_archive/upload', {
       method: 'POST',
       body: formData
     })
