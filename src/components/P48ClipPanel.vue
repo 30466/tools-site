@@ -42,13 +42,13 @@
         <span class="label">格式:</span>
         <el-select v-model="targetFormat" style="width: 100px" size="small">
           <template v-if="outputCategory === 'video'">
+            <el-option label="MP4 (默认)" value="mp4" />
             <el-option label="TS" value="ts" />
-            <el-option label="MP4" value="mp4" />
             <el-option label="MKV" value="mkv" />
             <el-option label="AVI" value="avi" />
             <el-option label="MOV" value="mov" />
             <el-option label="WEBM" value="webm" />
-            <el-option label="GIF" value="gif" />
+            <el-option label="GIF" value="gif" :disabled="embedDanmaku" />
           </template>
           <template v-else>
             <el-option label="M4A" value="m4a" />
@@ -62,6 +62,14 @@
         </el-select>
       </div>
     </div>
+    <DanmakuToggle
+      v-model="embedDanmaku"
+      v-model:duration="danmakuDuration"
+      v-model:max-count="danmakuMaxCount"
+      v-model:preset="danmakuPreset"
+      :disabled="outputCategory !== 'video'"
+      style="margin-top: 12px"
+    />
 
     <div style="margin-top: 12px">
       <el-button
@@ -73,7 +81,7 @@
         @click="loadFFmpegCore"
         style="width: 100%"
       >
-        {{ ffmpegLoading ? '⏳ 正在加载 FFmpeg 核心 (约30MB)...' : '🚀 加载 FFmpeg 核心' }}
+        {{ ffmpegLoading ? '⏳ 正在加载 FFmpeg 核心...' : '🚀 加载 FFmpeg 核心' }}
       </el-button>
       <el-button
         v-else
@@ -101,11 +109,20 @@ import { ElMessage } from 'element-plus'
 import { Document, Plus, Scissor } from '@element-plus/icons-vue'
 import * as p48 from '@/api/pocket48'
 import { FFmpegManager } from '@/composables/useFFmpeg'
+import {
+  useDanmakuEmbed,
+  DANMAKU_VIDEO_CRF,
+  formatDanmakuStats,
+  getDanmakuLimitLabel,
+  getDanmakuPresetLabel
+} from '@/composables/useDanmakuEmbed'
+import DanmakuToggle from '@/components/DanmakuToggle.vue'
 
 const props = defineProps({
   m3u8Url: { type: String, default: '' },
   member: { type: String, default: '谭思慧' },
-  broadcastTime: { type: String, default: '' }
+  broadcastTime: { type: String, default: '' },
+  danmakuUrl: { type: String, default: '' }
 })
 
 const emit = defineEmits(['ffmpeg-needed'])
@@ -113,16 +130,28 @@ const emit = defineEmits(['ffmpeg-needed'])
 const clipList = ref([])
 const txtInputRef = ref(null)
 const outputCategory = ref('video')
-const targetFormat = ref('ts')
+const targetFormat = ref('mp4')
 const concurrency = ref(10)
 const isProcessing = ref(false)
 const progress = ref(0)
 const logs = ref(['等待 FFmpeg 加载...'])
 const logBoxRef = ref(null)
 const ffmpegReady = ref(false)
+const danmakuDuration = ref(12)
+const danmakuMaxCount = ref('all')
+const danmakuPreset = ref('ultrafast')
 
 const ffmpegMgr = new FFmpegManager(addLog)
 const ffmpegLoading = ref(false)
+const embedDanmaku = ref(false)
+const { prepareDanmaku: prepareDanmakuEmbed } = useDanmakuEmbed()
+
+watch(embedDanmaku, (on) => {
+  if (on) {
+    outputCategory.value = 'video'
+    if (targetFormat.value === 'gif') targetFormat.value = 'mp4'
+  }
+})
 
 async function loadFFmpegCore() {
   ffmpegLoading.value = true
@@ -137,7 +166,7 @@ async function loadFFmpegCore() {
 }
 
 watch(outputCategory, (cat) => {
-  targetFormat.value = cat === 'video' ? 'ts' : 'm4a'
+  targetFormat.value = cat === 'video' ? 'mp4' : 'm4a'
 })
 
 function addLog(msg) {
@@ -217,6 +246,8 @@ function handleTxtSelect(event) {
 async function startClip() {
   if (!props.m3u8Url || clipList.value.length === 0) return
 
+  await ensureFFmpeg()
+
   isProcessing.value = true
   progress.value = 0
 
@@ -228,8 +259,38 @@ async function startClip() {
     const segments = p48.parseM3U8(m3u8Text, realBaseUrl)
     addLog(`✅ 解析到 ${segments.length} 个分片`)
 
+    // ── 弹幕嵌入：先获取 LRC，逐个片段生成自己的 drawtext 时间轴 ──
+    let lrcText = ''
+    const isAudio = ['mp3', 'm4a', 'flac', 'wav', 'aac', 'opus', 'ogg'].includes(targetFormat.value)
+    const useDanmaku = embedDanmaku.value && !isAudio
+
+    addLog('⚙️ 导出设置：')
+    addLog(`  格式：${targetFormat.value.toUpperCase()}`)
+    addLog(`  下载并发：${concurrency.value}`)
+    addLog(`  嵌入弹幕：${useDanmaku ? '开启' : '关闭'}`)
+    if (useDanmaku) {
+      addLog(`  弹幕滚动时长：${danmakuDuration.value}s`)
+      addLog(`  弹幕数量：${getDanmakuLimitLabel(danmakuMaxCount.value)}`)
+      addLog(`  编码速度：${getDanmakuPresetLabel(danmakuPreset.value)}`)
+      addLog(`  视频质量：crf=${DANMAKU_VIDEO_CRF}`)
+      if (!props.danmakuUrl) {
+        addLog('⚠️ 没有弹幕文件地址，跳过弹幕嵌入')
+      } else {
+        try {
+          addLog('🎬 正在获取弹幕...')
+          const resp = await fetch(props.danmakuUrl)
+          if (!resp.ok) throw new Error(`HTTP ${resp.status}`)
+          lrcText = await resp.text()
+        } catch (e) {
+          console.error('Danmaku error:', e)
+          const msg = e?.message || String(e) || '未知错误'
+          addLog(`⚠️ 弹幕获取失败: ${msg}，将正常剪切`)
+          lrcText = ''
+        }
+      }
+    }
+
     const format = targetFormat.value
-    const isAudio = ['mp3', 'm4a', 'flac', 'wav', 'aac', 'opus', 'ogg'].includes(format)
     let completedCount = 0
     const failedClips = []
 
@@ -292,6 +353,7 @@ async function startClip() {
 
     for (let i = 0; i < clipList.value.length; i++) {
       const clip = clipList.value[i]
+      let danmakuCleanup = null
       try {
         const safeName = clip.name || `clip_${i}`
         const outExt = '.' + format
@@ -359,7 +421,47 @@ async function startClip() {
         const clipDuration = endSec - startSec
         const baseCmd = ['-ss', String(clipOffset), '-i', 'concat.ts', '-to', String(clipOffset + clipDuration)]
 
-        if (copyable.includes(format)) {
+        danmakuCleanup = null
+        let danmakuFilterArgs = []
+        let danmakuVideoArgs = []
+        let danmakuAudioArgs = []
+        if (useDanmaku && lrcText) {
+          try {
+            const result = await prepareDanmakuEmbed(
+              ffmpegMgr.ffmpeg,
+              lrcText,
+              {},
+              addLog,
+              { startSec, endSec },
+              {
+                duration: danmakuDuration.value,
+                maxCount: danmakuMaxCount.value,
+                preset: danmakuPreset.value,
+                textFilePrefix: `dm_${i}`
+              }
+            )
+            if (result.empty) {
+              addLog('  ⚠️ 该片段内没有弹幕，跳过嵌入')
+            } else {
+              danmakuFilterArgs = result.filterArgs
+              danmakuVideoArgs = result.videoCodecArgs
+              danmakuAudioArgs = result.audioCodecArgs
+              danmakuCleanup = result.cleanup
+              addLog(`  ${formatDanmakuStats(result)}`)
+              addLog(`  ✅ 弹幕嵌入已就绪 (${getDanmakuPresetLabel(result.preset)}, crf=${result.crf})`)
+            }
+          } catch (e) {
+            console.error('Danmaku error:', e)
+            const msg = e?.message || String(e) || '未知错误'
+            addLog(`  ⚠️ 弹幕嵌入失败: ${msg}，将正常剪切`)
+          }
+        }
+
+        if (useDanmaku && danmakuFilterArgs.length > 0) {
+          addLog('  🎬 嵌入弹幕（重编码）...')
+          await ffmpegMgr.ffmpeg.exec([...baseCmd, ...danmakuFilterArgs, ...danmakuVideoArgs, ...danmakuAudioArgs, outputName])
+          if (danmakuCleanup) await danmakuCleanup()
+        } else if (copyable.includes(format)) {
           try {
             const copyCmd = isAudio ? [...baseCmd, '-vn', '-c:a', 'copy', outputName] : [...baseCmd, '-c', 'copy', outputName]
             await ffmpegMgr.ffmpeg.exec(copyCmd)
@@ -379,10 +481,12 @@ async function startClip() {
           const data = await ffmpegMgr.ffmpeg.readFile(outputName)
           downloadBlob(data, safeName + outExt)
           await ffmpegMgr.ffmpeg.deleteFile(outputName)
+          if (danmakuCleanup) await danmakuCleanup()
           completedCount++
         } catch (readErr) {
           addLog(`  ❌ 读取输出文件失败: ${readErr.message}`)
           failedClips.push({ name: safeName, error: readErr.message })
+          if (danmakuCleanup) await danmakuCleanup()
           await ffmpegMgr.ffmpeg.deleteFile('concat.ts')
           continue
         }
@@ -398,6 +502,7 @@ async function startClip() {
       } catch (e) {
         addLog(`  ❌ 跳过该片段: ${e.message}`)
         failedClips.push({ name: clip.name || `clip_${i}`, error: e.message })
+        if (danmakuCleanup) await danmakuCleanup()
         try { await ffmpegMgr.ffmpeg.deleteFile('concat.ts') } catch {}
       }
     }

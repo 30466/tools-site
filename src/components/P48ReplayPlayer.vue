@@ -9,6 +9,7 @@ import { ref, shallowRef, markRaw, onMounted, onBeforeUnmount, watch } from 'vue
 import ArtPlayer from 'artplayer'
 import Hls from 'hls.js'
 import danmukuPlugin from 'artplayer-plugin-danmuku'
+import { parseLRC } from '@/utils/danmaku'
 
 const props = defineProps({
   m3u8Url: { type: String, required: true },
@@ -25,33 +26,6 @@ const art = shallowRef(null)
 const danmakuData = ref([])
 let playerReady = false
 let danmukuPluginInstance = null
-
-function parseLRC(text) {
-  const items = []
-  const lines = text.split(/\r?\n/)
-  for (const line of lines) {
-    const match = line.match(/^\[(?:(\d{2}):)?(\d{2}):(\d{2}(?:\.\d+)?)\](.*)$/)
-    if (match) {
-      const h = match[1] ? parseInt(match[1]) : 0
-      const m = parseInt(match[2])
-      const s = parseFloat(match[3])
-      const time = h * 3600 + m * 60 + s
-      const parts = match[4].split('\t')
-      const user = parts[0].trim()
-      const text = parts[1] ? parts[1].trim() : ''
-      if (user || text) {
-        items.push({
-          user,
-          text,
-          time,
-          color: '#fff',
-          border: false
-        })
-      }
-    }
-  }
-  return items
-}
 
 async function fetchDanmaku() {
   if (!props.danmakuUrl) {
@@ -114,6 +88,7 @@ onMounted(async () => {
             const cdnOrigin = new URL(props.rawM3u8Url || 'https://idol-vod.48.cn').origin
             const cdnPath = new URL(props.rawM3u8Url || 'https://idol-vod.48.cn/').pathname
             const baseDir = cdnPath.substring(0, cdnPath.lastIndexOf('/') + 1)
+            // Rewrite TS segment URLs to direct CDN. TS files have ACAO:*.
             const rewritten = text.replace(
               /^(?!#)([^\s]+\.ts[^\s]*)$/gm,
               (match) => {
@@ -228,6 +203,7 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+/* Apd = ArtPlayer Danmuku */
 .replay-player {
   width: 100%;
   flex: 1;
@@ -244,6 +220,7 @@ onBeforeUnmount(() => {
 </style>
 
 <style>
+/* Hide danmaku send UI (keep toggle + settings + switch) */
 .apd-input,
 .apd-send,
 .apd-info {

@@ -119,6 +119,7 @@ async function downloadDanmaku() {
     a.click()
     setTimeout(() => URL.revokeObjectURL(url), 1000)
   } catch {
+    // fallback: direct open
     window.open(props.danmakuUrl, '_blank')
   }
 }

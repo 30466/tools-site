@@ -12,9 +12,21 @@
       </div>
     </div>
 
-    <el-alert type="info" :closable="false" show-icon style="margin-bottom: 12px">
+    <el-alert type="warning" :closable="false" show-icon style="margin-bottom: 12px">
       <template #title>
         日期归档规则：以次日 06:00 为界，凌晨 06:00 前的录播归档为前一天
+      </template>
+    </el-alert>
+
+    <el-alert type="warning" :closable="false" show-icon style="margin-bottom: 12px">
+      <template #title>
+        点击蓝色色块的日期，即会在日历底部显示当日录播时间条，再点击录播时间条即可播放
+      </template>
+    </el-alert>
+
+    <el-alert type="warning" :closable="false" show-icon style="margin-bottom: 12px">
+      <template #title>
+        如果录播始终加载不出来，则是口袋48源文件损坏，非网络或本网站问题（<b>HTTP 478</b>）
       </template>
     </el-alert>
 
@@ -48,10 +60,6 @@
 
     <div v-if="!loading && totalCount === 0 && loaded" class="empty-state">
       <el-empty description="该成员暂无录播记录"><div class="empty-text">暂无录播记录</div></el-empty>
-    </div>
-
-    <div v-if="totalCount > 0 && !loading && loaded && !selectedDate" class="date-hint">
-      点击日历中蓝色高亮的日期查看录播
     </div>
 
     <div v-if="replaysForSelectedDate.length > 0" class="replay-list-section">
@@ -346,13 +354,6 @@ defineExpose({ resetToLatest })
 }
 .calendar-cell.other-month .replay-badge {
   color: #999;
-}
-.date-hint {
-  text-align: center;
-  color: #fff;
-  margin-top: 12px;
-  font-size: 14px;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.6);
 }
 .empty-state {
   margin-top: 16px;

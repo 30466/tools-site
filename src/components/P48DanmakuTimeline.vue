@@ -48,6 +48,8 @@ function updateActive() {
   prevActiveIdx.value = activeIdx.value
   activeIdx.value = idx
 
+  // Only auto-scroll when the active danmaku index actually changes
+  // and the user hasn't manually scrolled in the last 4 seconds
   if (idx >= 0 && idx !== prevActiveIdx.value && Date.now() - lastUserScrollTime > SCROLL_RESET_DELAY) {
     const el = listRef.value.children[idx]
     if (el) {
