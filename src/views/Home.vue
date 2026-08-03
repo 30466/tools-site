@@ -256,7 +256,7 @@
         <div class="card-content">
           <div class="icon-box">🎤</div>
           <div class="info">
-            <h3>🎤 CGT48 徐郑子滢</h3>
+            <h3>🎤 GNZ48 徐郑子滢</h3>
             <p>徐郑子滢应援站，唱歌记录网站。</p>
           </div>
         </div>
