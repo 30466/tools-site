@@ -368,7 +368,13 @@ const startBatchClip = async () => {
 
         addLog(`✂️ [${i+1}/${clipList.value.length}] 处理: ${safeName} -> ${targetFormat.value.toUpperCase()}`);
 
-        const baseCmd = ['-ss', clip.start, '-i', inputName, '-to', clip.end];
+        const startSec = timeToSeconds(clip.start);
+        const endSec = timeToSeconds(clip.end);
+        const clipDuration = endSec - startSec;
+        if (!Number.isFinite(startSec) || !Number.isFinite(endSec) || clipDuration <= 0) {
+          throw new Error(`无效时间范围：${clip.start} - ${clip.end}`);
+        }
+        const baseCmd = ['-ss', clip.start, '-i', inputName, '-t', String(clipDuration)];
         const isAudio = ['mp3', 'm4a', 'flac', 'wav', 'aac', 'opus', 'ogg'].includes(targetFormat.value);
         const copyable = ['ts', 'mp4', 'mkv', 'avi', 'mov', 'webm', 'm4a'];
 
@@ -433,6 +439,18 @@ const startBatchClip = async () => {
 const getFileExtension = (filename) => {
   const idx = filename.lastIndexOf('.');
   return idx >= 0 ? filename.slice(idx) : '';
+};
+
+const timeToSeconds = (value) => {
+  const text = String(value).trim();
+  if (!text) return NaN;
+  const parts = text.split(':').map(Number);
+  if (parts.length < 1 || parts.length > 3 || parts.some(part => !Number.isFinite(part) || part < 0)) {
+    return NaN;
+  }
+  if (parts.length === 1) return parts[0];
+  if (parts.length === 2) return parts[0] * 60 + parts[1];
+  return parts[0] * 3600 + parts[1] * 60 + parts[2];
 };
 
 const getAudioEncoder = (format) => {

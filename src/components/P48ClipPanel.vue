@@ -419,7 +419,7 @@ async function startClip() {
 
         const clipOffset = startSec - firstSegStart
         const clipDuration = endSec - startSec
-        const baseCmd = ['-ss', String(clipOffset), '-i', 'concat.ts', '-to', String(clipOffset + clipDuration)]
+        const baseCmd = ['-ss', String(clipOffset), '-i', 'concat.ts', '-t', String(clipDuration)]
 
         danmakuCleanup = null
         let danmakuFilterArgs = []
