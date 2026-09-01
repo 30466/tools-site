@@ -21,6 +21,7 @@
                   <el-dropdown-item @click="scrollToSection('section-tools')">📌 剪辑工具</el-dropdown-item>
                   <el-dropdown-item @click="scrollToSection('section-skills')">📌 Skills</el-dropdown-item>
                   <el-dropdown-item @click="scrollToSection('section-support')">📌 应援站</el-dropdown-item>
+                  <el-dropdown-item @click="scrollToSection('section-data-collection')">📌 数据采集</el-dropdown-item>
                   <el-dropdown-item @click="scrollToSection('section-contact')">💬 联系我</el-dropdown-item>
                 </el-dropdown-menu>
               </template>

@@ -3,6 +3,9 @@
     <el-card class="welcome-card">
       <h2>欢迎使用 abm48 工具箱 🧰</h2>
       <p>这里集合了一些用于应援、剪辑和数据处理的小工具，旨在提高效率。</p>
+      <a href="https://github.com/30466/tools-site" target="_blank" rel="noopener noreferrer" class="source-link">
+        查看网站源代码（GitHub）
+      </a>
     </el-card>
 
     <!-- 推荐网站 -->
@@ -84,6 +87,26 @@
           <div class="info">
             <h3>明票榜</h3>
             <p>SNH48 GROUP明票投票榜单，查看成员实时排名数据。</p>
+          </div>
+        </div>
+      </el-card>
+
+      <el-card class="tool-card" shadow="hover" @click="openExternal('https://www.48archive.top/')">
+        <div class="card-content">
+          <div class="icon-box">📚</div>
+          <div class="info">
+            <h3>48 数据平台</h3>
+            <p>收录公演、成员、歌曲等 48 相关数据，方便查询和了解。</p>
+          </div>
+        </div>
+      </el-card>
+
+      <el-card class="tool-card" shadow="hover" @click="openExternal('https://p48.ruokezhang.com/')">
+        <div class="card-content">
+          <div class="icon-box">📝</div>
+          <div class="info">
+            <h3>口袋48直播总结</h3>
+            <p>整理口袋48直播回放的字幕、弹幕、总结和精彩片段。</p>
           </div>
         </div>
       </el-card>
@@ -263,6 +286,31 @@
       </el-card>
     </div>
 
+    <!-- 数据采集 -->
+    <h2 class="section-title" id="section-data-collection">📌 数据采集</h2>
+    <p class="section-hint">本地运行的数据采集与导出 CLI 工具，源代码托管在 GitHub。</p>
+    <div class="tools-grid">
+      <el-card class="tool-card" shadow="hover" @click="openExternal('https://github.com/30466/bili-core')">
+        <div class="card-content">
+          <div class="icon-box">📺</div>
+          <div class="info">
+            <h3>bili-core</h3>
+            <p>Bilibili UP 主视频列表抓取、元数据导出与音视频下载 CLI 工具。</p>
+          </div>
+        </div>
+      </el-card>
+
+      <el-card class="tool-card" shadow="hover" @click="openExternal('https://github.com/30466/weibo-core')">
+        <div class="card-content">
+          <div class="icon-box">📝</div>
+          <div class="info">
+            <h3>weibo-core</h3>
+            <p>微博账号帖子数据采集与 JSON、CSV 导出 CLI 工具。</p>
+          </div>
+        </div>
+      </el-card>
+    </div>
+
     <!-- 联系我 -->
     <div class="contact-section" id="section-contact">
       <h3 class="contact-subtitle">如果你想与我交流，可以通过以下方式联系我</h3>
@@ -348,6 +396,18 @@ const copyCmd = (cmd) => {
 .welcome-card {
   margin-bottom: 30px;
   background: rgba(255, 255, 255, 0.95);
+}
+
+.source-link {
+  display: inline-block;
+  margin-top: 8px;
+  color: #409eff;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.source-link:hover {
+  text-decoration: underline;
 }
 
 .section-title {
