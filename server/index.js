@@ -7,6 +7,7 @@ import express from 'express'
 import cors from 'cors'
 import multer from 'multer'
 import config from './config.js'
+import { formatBeijingDate } from '../src/utils/time.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -155,7 +156,7 @@ app.post('/apks/abm48/upload', upload.single('file'), async (req, res) => {
       name: versionName,
       filename: fileName,
       url: '/apks/abm48/' + fileName,
-      date: new Date().toISOString().slice(0, 10),
+      date: formatBeijingDate(),
       notes: notes.split(/[;；]/).map(s => s.trim()).filter(Boolean)
     }
     currentData.unshift(newEntry)
@@ -214,7 +215,7 @@ app.post('/apks/member_archive/upload', upload.single('file'), async (req, res) 
       name: versionName,
       filename: fileName,
       url: '/apks/member_archive/' + fileName,
-      date: new Date().toISOString().slice(0, 10),
+      date: formatBeijingDate(),
       notes: notes.split(/[;；]/).map(s => s.trim()).filter(Boolean)
     }
     currentData.unshift(newEntry)

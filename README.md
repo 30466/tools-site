@@ -67,6 +67,12 @@ npm run build
 npm run preview
 ```
 
+北京时间与 06:00 归档边界测试：
+
+```bash
+npm run test:time
+```
+
 ### Node.js 后端（可选，剪辑工具 TS 分片代理可选可不选，建议不选）
 
 ```bash
@@ -164,11 +170,14 @@ GET /proxy/segment?url=<encoded_url>
 
 - 动态成员搜索（el-autocomplete，从 48 API 实时获取成员映射）
 - 日历浏览：按年月归档，默认跳到最新录播月份，支持最早/最新快捷导航
+- 所有录播时间固定显示为北京时间；日历以北京时间次日 06:00 为归档分界
 - ArtPlayer + HLS.js 播放器，支持弹幕播放（artplayer-plugin-danmuku）
 - 3 路竞速批量剪切（CDN 代理 / 后端代理 / 直连），复用剪辑工具的滑动窗口并发池
 - 弹幕时间线与录播信息面板
 
 相关组件位于 `src/components/P48*.vue`，数据层封装在 `src/composables/useP48ReplayData.js`。
+
+时间转换统一由 `src/utils/time.js` 提供，并由浏览器页面和 Node 后端共同复用。口袋48 `ctime` 保留 Unix 毫秒时间戳，只有录播日历归档应用 06:00 分界；APK 发布日期和下载文件名使用北京时间自然日，不应用归档规则。工具不接受缺少时区的普通日期时间字符串作为绝对时刻，避免由运行机器猜测时区。
 
 API 封装位于 `src/api/pocket48.js`。
 
@@ -224,5 +233,3 @@ API 封装位于 `src/api/pocket48.js`。
 ├── AGENTS.md
 └── dist/                    # build 产物，部署到服务器根目录
 ```
-
-

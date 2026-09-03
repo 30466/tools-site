@@ -1,6 +1,7 @@
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import * as p48 from '@/api/pocket48'
+import { getArchiveDate } from '@/utils/time'
 
 const loading = ref(false)
 const loadingFull = ref(false)
@@ -15,18 +16,16 @@ const seenIds = new Set()
 let currentMemberName = ''
 let currentRoomMap = null
 
-function getReplayDate(ctimeMs) {
-  const d = new Date(Number(ctimeMs))
-  d.setHours(d.getHours() - 6)
-  return d.toISOString().slice(0, 10)
-}
-
 function addReplays(liveList) {
   let added = 0
   for (const r of liveList) {
+    const dateKey = getArchiveDate(r.ctime)
+    if (!dateKey) {
+      console.warn('[replay] 跳过开播时间无效的录播', r.liveId)
+      continue
+    }
     if (seenIds.has(r.liveId)) continue
     seenIds.add(r.liveId)
-    const dateKey = getReplayDate(r.ctime)
     if (!replaysByDate.value[dateKey]) {
       replaysByDate.value[dateKey] = []
     }

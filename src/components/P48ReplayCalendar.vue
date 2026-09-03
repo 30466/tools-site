@@ -14,7 +14,7 @@
 
     <el-alert type="warning" :closable="false" show-icon style="margin-bottom: 12px">
       <template #title>
-        日期归档规则：以次日 06:00 为界，凌晨 06:00 前的录播归档为前一天
+        所有时间均为北京时间；录播归档以次日 06:00 为分界，凌晨 06:00 前归档为前一天
       </template>
     </el-alert>
 
@@ -100,6 +100,7 @@ import { ref, computed, onMounted, watch, defineExpose } from 'vue'
 import { ElMessage } from 'element-plus'
 import { CircleCheck } from '@element-plus/icons-vue'
 import { useP48ReplayData } from '@/composables/useP48ReplayData'
+import { formatBeijingDateTime, getBeijingParts } from '@/utils/time'
 
 const props = defineProps({
   memberName: { type: String, default: '谭思慧' },
@@ -113,13 +114,15 @@ const {
   setMember, quickLoad, loadAll
 } = useP48ReplayData()
 
-const calendarDate = ref(new Date())
+const beijingNow = getBeijingParts()
+const currentYearNum = beijingNow.year
+const currentMonthNum = beijingNow.month
+const calendarDate = ref(new Date(currentYearNum, currentMonthNum - 1, 1, 12))
 const selectedDate = ref('')
 const selectedReplay = ref(null)
 
-const currentYearNum = new Date().getFullYear()
 const selectedYear = ref(currentYearNum)
-const selectedMonth = ref(new Date().getMonth() + 1)
+const selectedMonth = ref(currentMonthNum)
 
 const replaysForSelectedDate = computed(() => {
   if (!selectedDate.value) return []
@@ -145,13 +148,14 @@ const latestYear = computed(() => {
 const latestMonth = computed(() => {
   const dates = Object.keys(replaysByDate.value)
     .filter(d => d.startsWith(String(latestYear.value)))
-  if (dates.length === 0) return new Date().getMonth() + 1
+  if (dates.length === 0) return currentMonthNum
   return Math.max(...dates.map(d => parseInt(d.split('-')[1])))
 })
 
 const yearList = computed(() => {
   const years = []
-  for (let y = earliestYear.value; y <= currentYearNum; y++) years.push(y)
+  const endYear = Math.max(currentYearNum, latestYear.value)
+  for (let y = earliestYear.value; y <= endYear; y++) years.push(y)
   return years
 })
 const monthList = computed(() => {
@@ -178,10 +182,7 @@ function onDateClick(dayStr) {
 }
 
 function formatTime(ctimeMs) {
-  if (!ctimeMs) return ''
-  const d = new Date(Number(ctimeMs))
-  const pad = n => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
+  return formatBeijingDateTime(ctimeMs, { seconds: false })
 }
 
 async function onReplaySelect(r) {
@@ -235,7 +236,7 @@ function onYearMonthChange() {
   if (monthList.value.length > 0 && !monthList.value.includes(selectedMonth.value)) {
     selectedMonth.value = monthList.value[0]
   }
-  calendarDate.value = new Date(selectedYear.value, selectedMonth.value - 1, 1)
+  calendarDate.value = new Date(selectedYear.value, selectedMonth.value - 1, 1, 12)
 }
 
 watch(calendarDate, (d) => {

@@ -162,6 +162,7 @@ import { ElMessage, ElMessageBox } from 'element-plus';
 import { FolderAdd, Delete, Refresh } from '@element-plus/icons-vue';
 import VideoToolsNav from '@/components/VideoToolsNav.vue';
 import { FFmpegManager } from '@/composables/useFFmpeg';
+import { formatBeijingDate } from '@/utils/time';
 
 // --- 状态变量 ---
 const crossOriginIsolated = window.crossOriginIsolated;
@@ -369,7 +370,7 @@ const startBatchTranscode = async () => {
       
       const link = document.createElement('a');
       link.href = downloadUrl;
-      link.download = `Transcoded_${new Date().toISOString().slice(0,10)}.zip`;
+      link.download = `Transcoded_${formatBeijingDate()}.zip`;
       link.click();
       
       addLog('🎉 全部完成！已开始下载。');

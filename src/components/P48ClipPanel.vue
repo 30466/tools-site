@@ -117,6 +117,7 @@ import {
   getDanmakuPresetLabel
 } from '@/composables/useDanmakuEmbed'
 import DanmakuToggle from '@/components/DanmakuToggle.vue'
+import { formatBeijingDate } from '@/utils/time'
 
 const props = defineProps({
   m3u8Url: { type: String, default: '' },
@@ -515,7 +516,7 @@ async function startClip() {
       addLog('❌ 没有成功处理的片段')
       ElMessage.error('所有片段处理失败')
     } else {
-      downloadBlob(new Blob([recordContent], { type: 'text/plain;charset=utf-8' }), `_clip_record_${props.member}_${new Date().toISOString().slice(0, 10)}.txt`)
+      downloadBlob(new Blob([recordContent], { type: 'text/plain;charset=utf-8' }), `_clip_record_${props.member}_${formatBeijingDate()}.txt`)
       const summary = `🎉 完成！成功 ${completedCount}/${clipList.value.length}`
       addLog(summary)
       ElMessage.success(summary)

@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "test:time": "TZ=Asia/Shanghai node --test test/time.test.mjs && TZ=UTC node --test test/time.test.mjs && TZ=America/New_York node --test test/time.test.mjs",
     "preview": "vite preview",
     "server": "node server/index.js",
     "server:dev": "node --watch server/index.js"

@@ -109,6 +109,7 @@ import P48ReplayInfo from '@/components/P48ReplayInfo.vue'
 import P48ClipPanel from '@/components/P48ClipPanel.vue'
 import P48DanmakuTimeline from '@/components/P48DanmakuTimeline.vue'
 import * as p48 from '@/api/pocket48'
+import { formatBeijingDateTime } from '@/utils/time'
 
 const CACHE_KEY = 'replay_state'
 
@@ -242,16 +243,8 @@ function restoreState(liveId) {
   } catch { return false }
 }
 
-function fmtTime(ms) {
-  if (!ms) return ''
-  const d = new Date(+ms), p = n => String(n).padStart(2, '0')
-  return `${p(d.getHours())}:${p(d.getMinutes())}`
-}
-
 function fmtDate(ms) {
-  if (!ms) return ''
-  const d = new Date(+ms), p = n => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`
+  return formatBeijingDateTime(ms, { seconds: false })
 }
 
 async function onSelectReplay(r, options = {}) {
