@@ -6,11 +6,13 @@ import {
   getArchiveDate,
   getBeijingParts,
 } from '../src/utils/time.js'
+import { formatBeijingDate as formatServerBeijingDate } from '../server/time.js'
 
 test('口袋48毫秒时间戳固定显示为北京时间', () => {
   const replayTime = Date.parse('2026-08-28T05:56:00Z')
   assert.equal(formatBeijingDateTime(replayTime), '2026-08-28 13:56:00')
   assert.equal(formatBeijingDate(replayTime), '2026-08-28')
+  assert.equal(formatServerBeijingDate(replayTime), '2026-08-28')
   assert.deepEqual(getBeijingParts(replayTime), {
     year: 2026,
     month: 8,

@@ -177,7 +177,7 @@ GET /proxy/segment?url=<encoded_url>
 
 相关组件位于 `src/components/P48*.vue`，数据层封装在 `src/composables/useP48ReplayData.js`。
 
-时间转换统一由 `src/utils/time.js` 提供，并由浏览器页面和 Node 后端共同复用。口袋48 `ctime` 保留 Unix 毫秒时间戳，只有录播日历归档应用 06:00 分界；APK 发布日期和下载文件名使用北京时间自然日，不应用归档规则。工具不接受缺少时区的普通日期时间字符串作为绝对时刻，避免由运行机器猜测时区。
+浏览器时间转换统一由 `src/utils/time.js` 提供；独立部署的 Node 后端使用 `server/time.js`，两者遵循同一 `Asia/Shanghai` 契约。口袋48 `ctime` 保留 Unix 毫秒时间戳，只有录播日历归档应用 06:00 分界；APK 发布日期和下载文件名使用北京时间自然日，不应用归档规则。工具不接受缺少时区的普通日期时间字符串作为绝对时刻，避免由运行机器猜测时区。
 
 API 封装位于 `src/api/pocket48.js`。
 
@@ -225,6 +225,7 @@ API 封装位于 `src/api/pocket48.js`。
 │   └── apks/                # 部署时复制到根目录
 ├── server/                  # Node 后端（部署时复制到根目录）
 │   ├── index.js
+│   ├── time.js
 │   ├── config.js
 │   ├── package.json
 │   └── uploads/

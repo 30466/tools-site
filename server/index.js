@@ -7,7 +7,7 @@ import express from 'express'
 import cors from 'cors'
 import multer from 'multer'
 import config from './config.js'
-import { formatBeijingDate } from '../src/utils/time.js'
+import { formatBeijingDate } from './time.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
