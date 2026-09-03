@@ -23,15 +23,15 @@ test('口袋48毫秒时间戳固定显示为北京时间', () => {
   })
 })
 
-test('06:00 归档边界不依赖运行环境时区', () => {
-  assert.equal(getArchiveDate(Date.parse('2026-08-27T21:59:59Z')), '2026-08-27')
-  assert.equal(getArchiveDate(Date.parse('2026-08-27T22:00:00Z')), '2026-08-28')
+test('北京时间自然日边界不依赖运行环境时区', () => {
+  assert.equal(getArchiveDate(Date.parse('2026-08-28T15:59:59Z')), '2026-08-28')
+  assert.equal(getArchiveDate(Date.parse('2026-08-28T16:00:00Z')), '2026-08-29')
   assert.equal(getArchiveDate(Date.parse('2026-08-28T05:56:00Z')), '2026-08-28')
 })
 
-test('跨月跨年归档和无效值', () => {
-  assert.equal(getArchiveDate(Date.parse('2025-12-31T17:00:00Z')), '2025-12-31')
-  assert.equal(getArchiveDate(Date.parse('2026-02-28T17:00:00Z')), '2026-02-28')
+test('跨月跨年自然日和无效值', () => {
+  assert.equal(getArchiveDate(Date.parse('2025-12-31T16:00:00Z')), '2026-01-01')
+  assert.equal(getArchiveDate(Date.parse('2026-02-28T16:00:00Z')), '2026-03-01')
   assert.equal(getArchiveDate(''), null)
   assert.equal(getArchiveDate('not-a-time'), null)
   assert.equal(getArchiveDate('2026-08-28 13:56:00'), null)

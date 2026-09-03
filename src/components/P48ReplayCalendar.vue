@@ -14,7 +14,7 @@
 
     <el-alert type="warning" :closable="false" show-icon style="margin-bottom: 12px">
       <template #title>
-        所有时间均为北京时间；录播归档以次日 06:00 为分界，凌晨 06:00 前归档为前一天
+        所有时间均为北京时间；录播按北京时间自然日归档
       </template>
     </el-alert>
 

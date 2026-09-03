@@ -117,7 +117,6 @@ import {
   getDanmakuPresetLabel
 } from '@/composables/useDanmakuEmbed'
 import DanmakuToggle from '@/components/DanmakuToggle.vue'
-import { formatBeijingDate } from '@/utils/time'
 
 const props = defineProps({
   m3u8Url: { type: String, default: '' },
@@ -194,6 +193,14 @@ function downloadBlob(data, filename) {
   a.download = filename
   a.click()
   setTimeout(() => URL.revokeObjectURL(url), 1000)
+}
+
+function getRecordFilename() {
+  const value = String(props.broadcastTime).trim()
+  const filenameTime = value.match(/^\d{4}-\d{2}-\d{2}~\d{2}\.\d{2}\.\d{2}/)?.[0]
+  if (filenameTime) return `${filenameTime}.txt`
+  const displayTime = value.match(/^(\d{4}-\d{2}-\d{2})\s+(\d{2}):(\d{2}):(\d{2})/)
+  return displayTime ? `${displayTime[1]}~${displayTime[2]}.${displayTime[3]}.${displayTime[4]}.txt` : '_clip_record.txt'
 }
 
 function getFileExtension(filename) {
@@ -516,7 +523,7 @@ async function startClip() {
       addLog('❌ 没有成功处理的片段')
       ElMessage.error('所有片段处理失败')
     } else {
-      downloadBlob(new Blob([recordContent], { type: 'text/plain;charset=utf-8' }), `_clip_record_${props.member}_${formatBeijingDate()}.txt`)
+      downloadBlob(new Blob([recordContent], { type: 'text/plain;charset=utf-8' }), getRecordFilename())
       const summary = `🎉 完成！成功 ${completedCount}/${clipList.value.length}`
       addLog(summary)
       ElMessage.success(summary)
