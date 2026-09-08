@@ -292,7 +292,7 @@
     <div class="tools-grid">
       <el-card class="tool-card" shadow="hover" @click="openExternal('https://github.com/30466/bili-core')">
         <div class="card-content">
-          <div class="icon-box">📺</div>
+          <div class="icon-box bilibili-icon"><i class="fab fa-bilibili"></i></div>
           <div class="info">
             <h3>bili-core</h3>
             <p>Bilibili UP 主视频列表抓取、元数据导出与音视频下载 CLI 工具。</p>
@@ -302,10 +302,20 @@
 
       <el-card class="tool-card" shadow="hover" @click="openExternal('https://github.com/30466/weibo-core')">
         <div class="card-content">
-          <div class="icon-box">📝</div>
+          <div class="icon-box weibo-icon"><i class="fab fa-weibo"></i></div>
           <div class="info">
             <h3>weibo-core</h3>
-            <p>微博账号帖子数据采集与 JSON、CSV 导出 CLI 工具。</p>
+            <p>微博账号帖子数据采集与 JSON、CSV 导出 CLI 工具，批量下载图文与音视频功能。</p>
+          </div>
+        </div>
+      </el-card>
+
+      <el-card class="tool-card" shadow="hover" @click="openExternal('https://github.com/30466/douyin-downloader')">
+        <div class="card-content">
+          <div class="icon-box douyin-icon"><i class="fab fa-tiktok"></i></div>
+          <div class="info">
+            <h3>douyin-downloader</h3>
+            <p>抖音账号主页作品数据爬取导出和批量下载。</p>
           </div>
         </div>
       </el-card>
@@ -315,20 +325,10 @@
     <div class="contact-section" id="section-contact">
       <h3 class="contact-subtitle">如果你想与我交流，可以通过以下方式联系我</h3>
       <div class="contact-buttons">
-        <a href="mailto:your-email@example.com" class="contact-btn email-btn">
-          ✉️ 发送邮件
-        </a>
-        <div class="contact-btn wechat-btn" @click="showQrCode('wechat')">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M8.667 11.511a1.276 1.276 0 0 1-1.285-1.285c0-.718.567-1.286 1.285-1.286.717 0 1.285.568 1.285 1.286 0 .717-.568 1.285-1.285 1.285zm6.666 0a1.276 1.276 0 0 1-1.285-1.285c0-.718.568-1.286 1.285-1.286.718 0 1.285.568 1.285 1.286 0 .717-.567 1.285-1.285 1.285zm-8.51 7.704l.715-.436a4 4 0 0 1 2.705-.536c.212.033.386.059.52.076.406.054.82.081 1.237.081 4.42 0 7.9-3.022 7.9-6.6S16.42 5.2 12 5.2s-7.9 3.022-7.9 6.6c0 1.366.5 2.673 1.432 3.781.048.057.12.137.214.235a4 4 0 0 1 1.101 3.102l-.025.297zm-.63 2.727a1 1 0 0 1-1.527-.93l.188-2.26a2 2 0 0 0-.55-1.551A6.993 6.993 0 0 1 4 16.868C2.806 15.447 2.1 13.695 2.1 11.8c0-4.75 4.432-8.6 9.9-8.6s9.9 3.85 9.9 8.6-4.432 8.6-9.9 8.6c-.51 0-1.01-.033-1.499-.098a23.61 23.61 0 0 1-.569-.084 2 2 0 0 0-1.353.268l-2.387 1.456z"/></svg>
-          添加微信
-        </div>
-        <div class="contact-btn qq-btn" @click="showQrCode('qq')">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M21.395 15.035a39.548 39.548 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a38.97 38.97 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673zM12.662 4.846c.039-1.052.659-1.878 1.385-1.846s1.281.912 1.242 1.964c-.039 1.051-.659 1.878-1.385 1.846s-1.282-.912-1.242-1.964zM9.954 3c.725-.033 1.345.794 1.384 1.846.04 1.052-.517 1.931-1.242 1.963-.726.033-1.346-.794-1.385-1.845C8.672 3.912 9.228 3.033 9.954 3zM7.421 8.294c.194-.43 2.147-.908 4.566-.908h.026c2.418 0 4.372.479 4.566.908a.14.14 0 0 1 .014.061c0 .031-.01.059-.026.083-.163.238-2.333 1.416-4.553 1.416h-.026c-2.221 0-4.39-1.178-4.553-1.416a.136.136 0 0 1-.014-.144zm10.422 8.622c-.22 3.676-2.403 5.987-5.774 6.021h-.137c-3.37-.033-5.554-2.345-5.773-6.021-.081-1.35.001-2.496.147-3.43.318.063.638.122.958.176v3.506s1.658.334 3.318.103v-3.225c.488.027.96.04 1.406.034h.025c1.678.021 3.714-.204 5.683-.594.146.934.227 2.08.147 3.43zM10.48 5.804c.313-.041.542-.409.508-.825-.033-.415-.314-.72-.629-.679-.313.04-.541.409-.508.824.034.417.315.72.629.68zM14.479 5.156c.078.037.221.042.289-.146.035-.095.025-.165-.009-.214-.023-.033-.133-.118-.371-.176-.904-.22-1.341.384-1.405.499-.04.072-.012.176.056.227.067.051.139.037.179-.006.58-.628 1.21-.208 1.261-.184z"/></svg>
-          添加QQ
-        </div>
-        <a href="https://me.abm48.com/" target="_blank" class="contact-btn homepage-btn">
-          🏠 我的个人主页
-        </a>
+        <a href="mailto:chenbojun04@gmail.com" class="contact-btn">✉️ 发送邮件</a>
+        <button class="contact-btn" type="button" @click="showQrCode('wechat')"><i class="fab fa-weixin"></i> 添加微信</button>
+        <button class="contact-btn" type="button" @click="showQrCode('qq')"><i class="fab fa-qq"></i> 添加QQ</button>
+        <a href="https://me.abm48.com/" target="_blank" rel="noopener noreferrer" class="contact-btn">🏠 我的个人主页</a>
       </div>
     </div>
 
@@ -469,6 +469,18 @@ const copyCmd = (cmd) => {
   line-height: 1.5;
 }
 
+.bilibili-icon {
+  color: #00a1d6;
+}
+
+.weibo-icon {
+  color: #e6162d;
+}
+
+.douyin-icon {
+  color: #161823;
+}
+
 /* 联系我 */
 .contact-section {
   margin-top: 50px;
@@ -490,31 +502,31 @@ const copyCmd = (cmd) => {
 
 .contact-btn {
   display: flex;
+  width: 140px;
+  height: 44px;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  width: 140px;
-  height: 44px;
-  border-radius: 8px;
+  border: 0;
+  border-radius: 4px;
+  background: #204fa1;
   color: #fff;
-  font-weight: bold;
+  font: inherit;
   font-size: 14px;
+  font-weight: 700;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
   text-decoration: none;
 }
 
 .contact-btn:hover {
+  color: #fff;
   transform: translateY(-3px);
   box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 }
 
-.contact-btn .el-icon { font-size: 20px; }
-
-.contact-btn { background-color: #204fa1; }
-
 /* 弹窗标题居中加粗 */
-:deep(.el-dialog__header) {
+:deep(.qr-dialog .el-dialog__header) {
   text-align: center;
 }
 .dialog-title {
