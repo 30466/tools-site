@@ -8,6 +8,7 @@
 import { ref, shallowRef, markRaw, onMounted, onBeforeUnmount, watch } from 'vue'
 import ArtPlayer from 'artplayer'
 import Hls from 'hls.js'
+import { ElMessageBox } from 'element-plus'
 import danmukuPlugin from 'artplayer-plugin-danmuku'
 import { parseLRC } from '@/utils/danmaku'
 
@@ -26,6 +27,34 @@ const art = shallowRef(null)
 const danmakuData = ref([])
 let playerReady = false
 let danmukuPluginInstance = null
+const HTTP_478_LIMIT = 5
+let consecutiveHttp478 = 0
+let playbackStoppedBy478 = false
+
+function getHttpStatus(data) {
+  const candidates = [
+    data?.response?.code,
+    data?.response?.status,
+    data?.networkDetails?.status,
+    data?.networkDetails?.response?.status,
+  ]
+  const directStatus = candidates.map(Number).find(Number.isFinite)
+  if (directStatus) return directStatus
+  const message = [data?.details, data?.reason, data?.error?.message].filter(Boolean).join(' ')
+  return /(?:HTTP\s*)?478\b/i.test(message) ? 478 : 0
+}
+
+function stopForHttp478(hls, video) {
+  if (playbackStoppedBy478) return
+  playbackStoppedBy478 = true
+  hls.stopLoad()
+  video.pause()
+  ElMessageBox.alert(
+    '口袋48源文件损坏或被物理删除，非网络或本网站问题（<strong>HTTP 478</strong>）。',
+    '录播无法播放',
+    { type: 'error', confirmButtonText: '知道了', dangerouslyUseHTMLString: true }
+  ).catch(() => {})
+}
 
 async function fetchDanmaku() {
   if (!props.danmakuUrl) {
@@ -109,10 +138,24 @@ onMounted(async () => {
               startFragPrefetch: false,
               testBandwidth: false,
               fragLoadingTimeOut: 10000,
-              fragLoadingMaxRetry: 3,
+              fragLoadingMaxRetry: 0,
               fragLoadingRetryDelay: 500
             })
+            hls.on(Hls.Events.FRAG_LOADED, () => {
+              consecutiveHttp478 = 0
+            })
             hls.on(Hls.Events.ERROR, (event, data) => {
+              if (playbackStoppedBy478) return
+              if (getHttpStatus(data) === 478) {
+                consecutiveHttp478 += 1
+                console.warn(`[HLS] 连续收到 HTTP 478（${consecutiveHttp478}/${HTTP_478_LIMIT}）`)
+                if (consecutiveHttp478 >= HTTP_478_LIMIT) {
+                  stopForHttp478(hls, video)
+                  return
+                }
+              } else if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+                consecutiveHttp478 = 0
+              }
               if (data.fatal) {
                 if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
                   hls.startLoad()
