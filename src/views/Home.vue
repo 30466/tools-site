@@ -51,6 +51,36 @@
         </div>
       </el-card>
 
+      <el-card class="tool-card" shadow="hover" @click="openExternal('https://gnz.hk/')">
+        <div class="card-content">
+          <div class="icon-box">💬</div>
+          <div class="info">
+            <h3>牙牙消息</h3>
+            <p>SNH48 成员房间消息抓取与检索，支持口袋48直播回放、翻牌、成员资料、上麦及音乐电台等功能。</p>
+          </div>
+        </div>
+      </el-card>
+
+      <el-card class="tool-card" shadow="hover" @click="openExternal('https://www.48archive.top/')">
+        <div class="card-content">
+          <div class="icon-box">📚</div>
+          <div class="info">
+            <h3>48 数据平台</h3>
+            <p>收录公演、成员、歌曲等 48 相关数据，方便查询和了解。</p>
+          </div>
+        </div>
+      </el-card>
+
+      <el-card class="tool-card" shadow="hover" @click="openExternal('https://xox48.top/')">
+        <div class="card-content">
+          <div class="icon-box">📊</div>
+          <div class="info">
+            <h3>明票榜</h3>
+            <p>SNH48 GROUP明票投票榜单，查看成员实时排名数据。</p>
+          </div>
+        </div>
+      </el-card>
+
       <el-card class="tool-card" shadow="hover" @click="openExternal('https://glx48call.dpdns.org/')">
         <div class="card-content">
           <div class="icon-box">🎵</div>
@@ -77,26 +107,6 @@
           <div class="info">
             <h3>官方成员简介</h3>
             <p>SNH48 GROUP官方成员索引，可按分队查询在团成员详细资料。</p>
-          </div>
-        </div>
-      </el-card>
-
-      <el-card class="tool-card" shadow="hover" @click="openExternal('https://xox48.top/')">
-        <div class="card-content">
-          <div class="icon-box">📊</div>
-          <div class="info">
-            <h3>明票榜</h3>
-            <p>SNH48 GROUP明票投票榜单，查看成员实时排名数据。</p>
-          </div>
-        </div>
-      </el-card>
-
-      <el-card class="tool-card" shadow="hover" @click="openExternal('https://www.48archive.top/')">
-        <div class="card-content">
-          <div class="icon-box">📚</div>
-          <div class="info">
-            <h3>48 数据平台</h3>
-            <p>收录公演、成员、歌曲等 48 相关数据，方便查询和了解。</p>
           </div>
         </div>
       </el-card>
